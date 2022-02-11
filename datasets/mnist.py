@@ -11,25 +11,58 @@ class Mnist(DatasetBase):
     """
     def __init__(self, train_fraction):
         """ Constructor method.
+
+            Parameters:
+            train_fraction (float): Fraction of training data to use.
         """
 
         transform = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
-        self.test_data = MNIST(root='data', train=False, transform=transform, download=True)
+        self.test_data = MNIST(
+            root='data', 
+            train=False, 
+            transform=transform, 
+            download=True)
 
-        # TODO: Wrap into a function.
-        train_data = MNIST(root='data', train=True, transform=transform, download=True)
+        self.train_data = self._sample_train_data(train_fraction, transform)
+
+    def _sample_train_data(self, train_fraction, transform):
+        """ Sample a chosen fraction of the training dataset to use.
+
+            Parameters:
+            train_fraction  (float): Fraction of training data to use.
+            transform       (torchvision.transforms.Compose): Collection of transforms to apply on data.
+
+            Returns:
+            torch.utils.data.Subset: Subset of training data.
+        """
+        train_data = MNIST(
+            root='data', 
+            train=True, 
+            transform=transform, 
+            download=True)
         n_samples = len(train_data.targets)
         index_limit = int(train_fraction * n_samples)
         chosen_indices = np.random.choice(torch.arange(n_samples), size=index_limit, replace=False)
-        self.train_data = Subset(train_data, chosen_indices)
         print(f"\nUsing {index_limit} training samples", flush=True)
 
+        return Subset(train_data, chosen_indices)
+
     def get_train_data_loaders(self, n_clients, distribution, alpha, batch_size):
+        """ Get list of client training data loaders.
+
+            Parameters:
+            n_clients       (int): Number of clients.
+            distribution    (str): iid/non-iid distributed data.
+            alpha           (float): Concentration parameter for dirichlet distribution.
+            batch_size      (int): Batch size for loading training data.
+
+            Returns List[torch.utils.data.DataLoader]
+        """
         labels = [y for (_, y) in self.train_data]
         n_classes = len(np.unique(labels))
         partition_matrix = np.ones((n_classes, n_clients))
 
-        # iid
+        # iid TODO: Make random slices.
         if distribution == "iid":
             partition_matrix /= n_clients
             size = int(np.floor(len(labels)/n_clients))
@@ -64,4 +97,9 @@ class Mnist(DatasetBase):
         return partition_matrix, client_data_loaders
     
     def get_test_data_loader(self, batch_size):
+        """ Get test data loader.
+
+            Parameters:
+            batch_size      (int): Batch size for loading test data.
+        """
         return DataLoader(self.test_data, batch_size)
