@@ -5,8 +5,7 @@ import torch.nn.functional as F
 def create_model(model_name):
     if "cnn" in model_name:
         return Cnn()
-
-    if "dense" in model_name:
+    elif "dense" in model_name:
         return Dense()
 
 
