@@ -3,6 +3,7 @@ import copy
 import torch.optim as optim
 from collections import OrderedDict
 import torch.nn.functional as F
+import torch
 
 
 class FedAvgServer(ServerBase):
@@ -23,19 +24,18 @@ class FedAvgServer(ServerBase):
 
     def run(self):
 
-        # Initialize average weights to 0
+        # Initialize average weights to zero.
         avg_weights = OrderedDict()
-        global_weights = self.global_model.state_dict()
         for param_name in self.global_model.state_dict().keys():
-            avg_weights[param_name] = global_weights[param_name] * 0
+            avg_weights[param_name] = torch.zeros(self.global_model.state_dict()[param_name].shape)
         
         for j in range(self.n_clients):
-            print("-- Client {} --".format(j+1), flush=True)
+            print("-- Training client nr {} --".format(j+1), flush=True)
             self._local_training(j)
 
             avg_weights = self._increment_weighted_average(avg_weights, self.local_model.state_dict(), j)
 
-            self.set_weights(avg_weights)    
+        self.global_model.load_state_dict(avg_weights)    
     
     def _local_training(self, client_nr):
         self.local_model = copy.deepcopy(self.global_model)
@@ -60,9 +60,3 @@ class FedAvgServer(ServerBase):
     
     def get_scaling_factor(self, client_nr):
         return self.n_samples_client[client_nr] / self.n_samples_total
-
-    def get_weights(self):
-        return self.model.get_weights()
-    
-    def set_weights(self, weights):
-        self.global_model.load_state_dict(weights)
