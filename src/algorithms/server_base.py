@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import torch
 
 class ServerBase(ABC):
-    """Abstract base class defining servers."""
+    """Abstract base class defining datasets."""
     def __init__(self, args, train_loaders, test_loader) -> None:
         self.global_model = create_model(args.model_name)
         self.train_loaders = train_loaders
@@ -21,7 +21,7 @@ class ServerBase(ABC):
     @abstractmethod
     def _loss_function(output, labels, epoch):
         pass
-    
+
     def evaluate(self):
         self.global_model.eval()
         test_losses = []
