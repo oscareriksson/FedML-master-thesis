@@ -3,21 +3,11 @@ import copy
 import torch.optim as optim
 from collections import OrderedDict
 import torch.nn.functional as F
-import torch
 
 
 class FedAvgServer(ServerBase):
-    """ Server for FedAvg algorithm.
-    """
     def __init__(self, args, train_loaders, test_loader) -> None:
         super().__init__(args, train_loaders, test_loader)
-        """ Constructor method.
-
-            Parameters:
-            args            (dict): Dictionary of server parameters to use.
-            train_loaders   (list): List of training data loaders.
-            test_loader     (torch.util.data.DataLoader): Data loader for test data.
-        """
 
         self.local_model = None
         self.n_clients = args.n_clients
@@ -29,31 +19,23 @@ class FedAvgServer(ServerBase):
 
     
     def _loss_function(self, output, labels, epoch):
-        """ Loss function for local training..
-
-            Parameters:
-            output  (tensor): Model output.
-            labels  (tensor): True labels.
-
-            Returns:
-            tensor: Loss evaluated at given model output and labels.
-        """
         return F.cross_entropy(output, labels)
 
     def run(self):
-        
-        # Initialize average weights to zero.
-        avg_weights = OrderedDict()
-        for param_name in self.global_model.state_dict().keys():
-            avg_weights[param_name] = torch.zeros(self.global_model.state_dict()[param_name].shape)
 
+        # Initialize average weights to 0
+        avg_weights = OrderedDict()
+        global_weights = self.global_model.state_dict()
+        for param_name in self.global_model.state_dict().keys():
+            avg_weights[param_name] = global_weights[param_name] * 0
+        
         for j in range(self.n_clients):
-            print("-- Training client nr {} --".format(j+1), flush=True)
+            print("-- Client {} --".format(j+1), flush=True)
             self._local_training(j)
 
             avg_weights = self._increment_weighted_average(avg_weights, self.local_model.state_dict(), j)
 
-        self.global_model.load_state_dict(avg_weights)
+            self.set_weights(avg_weights)    
     
     def _local_training(self, client_nr):
         self.local_model = copy.deepcopy(self.global_model)
@@ -69,7 +51,7 @@ class FedAvgServer(ServerBase):
                 optimizer.step()
 
     def _increment_weighted_average(self, model, model_next, client_nr):
-        """ Update an weighted average """
+        """ Update an incremental average. """
         w = OrderedDict()
         for name in model.keys():
             #tensorDiff = model_next[name] - model[name]
@@ -78,3 +60,9 @@ class FedAvgServer(ServerBase):
     
     def get_scaling_factor(self, client_nr):
         return self.n_samples_client[client_nr] / self.n_samples_total
+
+    def get_weights(self):
+        return self.model.get_weights()
+    
+    def set_weights(self, weights):
+        self.global_model.load_state_dict(weights)
