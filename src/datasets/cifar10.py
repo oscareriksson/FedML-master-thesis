@@ -7,7 +7,7 @@ import numpy as np
 
 
 class Cifar10(DatasetBase):
-    """ Mnist dataset class.
+    """ Cifar10 dataset class.
     """
     def __init__(self, train_fraction):
         """ Constructor method.
