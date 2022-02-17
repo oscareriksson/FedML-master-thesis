@@ -14,6 +14,7 @@ class FedAvgServer(ServerBase):
         self.n_clients = args.n_clients
         self.n_rounds = args.n_rounds
         self.lr_rate = args.learning_rate
+        self.momentum = args.momentum
         self.local_epochs = args.local_epochs
         self.n_samples_client = [len(data_loader.dataset) for data_loader in train_loaders]
         self.n_samples_total = sum(self.n_samples_client)
@@ -38,12 +39,13 @@ class FedAvgServer(ServerBase):
         self.global_model.load_state_dict(avg_weights)    
     
     def _local_training(self, client_nr):
-        self.local_model = copy.deepcopy(self.global_model)
+        self.local_model = copy.deepcopy(self.global_model).to(self.device)
         self.local_model.train()
-        optimizer = optim.SGD(self.local_model.parameters(), lr=self.lr_rate)
+        optimizer = optim.SGD(self.local_model.parameters(), lr=self.lr_rate, momentum=self.momentum)
 
         for i in range(self.local_epochs):
             for x, y in self.train_loaders[client_nr]:
+                x, y = x.to(self.device), y.to(self.device)
                 optimizer.zero_grad()
                 output = self.local_model(x)
                 error = self._loss_function(output, y, i)
