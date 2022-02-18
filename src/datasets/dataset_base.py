@@ -47,15 +47,32 @@ class PytorchDataset:
         n_classes = len(np.unique(labels))
         partition_matrix = np.ones((n_classes, n_clients))
 
-        # iid TODO: Make random slices.
+        # iid: Sample from each class until no samples left.
         if distribution == "iid":
             partition_matrix /= n_clients
-            size = int(np.floor(len(labels)/n_clients))
             client_data_loaders = []
-            client_indices = np.random.choice(torch.arange(self.n_samples), size=(n_clients, size), replace=False)
+            client_indices = [np.array([], dtype=int) for _ in range(n_clients)]
+            clients_iter = np.arange(n_clients)
+
+            for i in range(n_classes):
+                class_indices = np.where(labels == i)[0]
+                np.random.shuffle(class_indices)
+                
+                clients_iter = clients_iter[::-1]
+                samples_left = True
+                while samples_left:
+                    for j in clients_iter:
+                        if len(class_indices) == 0:
+                            samples_left = False
+                            break
+                        else:
+                            sample_idx = np.random.choice(len(class_indices))
+                            client_indices[j] = np.append(client_indices[j], class_indices[sample_idx])
+                            class_indices = np.delete(class_indices, sample_idx)
+
             for i in range(n_clients):
                 client_data_loaders.append(DataLoader(Subset(self.train_data, client_indices[i]), batch_size))
-        # non-iid
+        # non-iid: Sample from dirichlet distribution.
         else:
             class_indices = []
             for i in range(n_classes):
