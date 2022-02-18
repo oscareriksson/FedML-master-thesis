@@ -16,6 +16,7 @@ with datasets
 
 - Mnist
 - Cifar10
+- Cifar100
 
 
 **Experiments on Mnist**
@@ -40,11 +41,16 @@ python main.py --dataset cifar10 --algorithm fedprox --n_clients 5 --n_rounds 2 
 [Planning report](Planning_report.pdf)
 
 **Week 4**
-- [X] Setup of test framework
-- [X] Mnist data
-- [X] FedAvg
+- [X] Setup of test framework.
+- [X] Mnist data.
+- [X] FedAvg.
 
 **Week 5**
-- [X] Cifar10
-- [ ] Cifar100
-- [X] FedProx
+- [X] Cifar10.
+- [X] Cifar100.
+- [X] FedProx.
+- [X] Possible to run the main script with multiple algorithms over a specified number of random seeds.
+- [X] Possible to evaluate and display local training accuracy.
+
+**Week 6**
+- [] Ensemble distillation methods ...
