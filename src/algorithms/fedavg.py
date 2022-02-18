@@ -4,26 +4,15 @@ import torch.optim as optim
 from collections import OrderedDict
 import torch.nn.functional as F
 import torch
+from tqdm import tqdm
 
 
 class FedAvgServer(ServerBase):
-    def __init__(self, args, train_loaders, test_loader) -> None:
-        super().__init__(args, train_loaders, test_loader)
+    def __init__(self, args, model, train_loaders, test_loader) -> None:
+        super().__init__(args, model, train_loaders, test_loader)
 
-        self.local_model = None
-        self.n_clients = args.n_clients
-        self.n_rounds = args.n_rounds
-        self.lr_rate = args.learning_rate
-        self.momentum = args.momentum
-        self.local_epochs = args.local_epochs
-        self.n_samples_client = [len(data_loader.dataset) for data_loader in train_loaders]
-        self.n_samples_total = sum(self.n_samples_client)
-
-    
-    def _loss_function(self, output, labels, epoch):
-        return F.cross_entropy(output, labels)
-
-    def run(self):
+    def run(self, round_nr):
+        self.set_round(round_nr)
 
         # Initialize average weights to zero.
         avg_weights = OrderedDict()
@@ -31,7 +20,7 @@ class FedAvgServer(ServerBase):
             avg_weights[param_name] = torch.zeros(self.global_model.state_dict()[param_name].shape)
         
         for j in range(self.n_clients):
-            print("-- Training client nr {} --".format(j+1), flush=True)
+            print("-- Training client nr {} --".format(j+1))
             self._local_training(j)
 
             avg_weights = self._increment_weighted_average(avg_weights, self.local_model.state_dict(), j)
@@ -44,13 +33,33 @@ class FedAvgServer(ServerBase):
         optimizer = optim.SGD(self.local_model.parameters(), lr=self.lr_rate, momentum=self.momentum)
 
         for i in range(self.local_epochs):
-            for x, y in self.train_loaders[client_nr]:
+            for x, y in tqdm(
+                self.train_loaders[client_nr],
+                leave=False,
+                desc=f"Epoch {i+1}/{self.local_epochs}", 
+                bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}"):
                 x, y = x.to(self.device), y.to(self.device)
                 optimizer.zero_grad()
                 output = self.local_model(x)
-                error = self._loss_function(output, y, i)
+                error = self.loss_function(output, y)
                 error.backward()
                 optimizer.step()
+        print("Training completed")
+        if self.evaluate_train:
+            print("Training Accuracy: {:.0f}%\n".format(self._evaluate_train(client_nr)), flush=True)
+        else:
+            print("")
+    
+    def _evaluate_train(self, client_nr):
+        self.local_model.eval()
+        correct = 0
+        with torch.no_grad():
+            for x, y in self.train_loaders[client_nr]:
+                x, y = x.to(self.device), y.to(self.device)
+                output = self.local_model(x)
+                _, pred = torch.max(output.data, 1)
+                correct += (pred == y).sum().item()
+        return 100. * correct / len(self.train_loaders[client_nr].dataset)
 
     def _increment_weighted_average(self, model, model_next, client_nr):
         """ Update an incremental average. """
