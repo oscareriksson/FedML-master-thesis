@@ -14,6 +14,9 @@ class PytorchDataset:
         module = importlib.import_module(f"torchvision.datasets")
         self.data_class = getattr(module, dataset_name)
         self.client_data_indices = []
+        self.train_data = None
+        self.test_data = None
+        self.public_data = None
 
 
     def _sample_train_data(self, train_fraction, transform):
@@ -58,7 +61,6 @@ class PytorchDataset:
 
             for i in range(n_classes):
                 class_indices = np.where(labels == i)[0]
-                np.random.shuffle(class_indices)
                 
                 clients_iter = clients_iter[::-1]
                 samples_left = True
@@ -93,6 +95,30 @@ class PytorchDataset:
 
         self.local_sets_indices = local_sets_indices
 
+    def split_test_public(self, n_samples):
+        labels = np.array([y for (_, y) in self.test_data])
+        n_classes = len(np.unique(labels))
+        n_samples_per_class = int(n_samples / n_classes)
+        all_indices = np.arange(len(labels))
+
+        public_set_indices = []
+
+        for i in range(n_classes):
+            class_indices = np.where(labels == i)[0]
+            chosen_indices = list(np.random.choice(class_indices, n_samples_per_class, replace=False))
+            public_set_indices.extend(chosen_indices)
+
+        # Fill up to n_samples.
+        samples_left = n_samples - len(public_set_indices)
+        indices_left = [x for x in all_indices if x not in public_set_indices]
+        chosen_indices = list(np.random.choice(indices_left, samples_left, replace=False))
+        public_set_indices.extend(chosen_indices)
+
+        test_set_indices = [x for x in all_indices if x not in public_set_indices]
+
+        self.public_data = Subset(self.test_data, public_set_indices)
+        self.test_data = Subset(self.test_data, test_set_indices)
+
 
     def get_train_data_loaders(self, batch_size):
         """ Get list of client training data loaders.
@@ -118,4 +144,12 @@ class PytorchDataset:
             batch_size      (int): Batch size for loading test data.
         """
         return DataLoader(self.test_data, batch_size)
+
+    def get_public_data_loader(self, batch_size):
+        """ Get test data loader.
+
+            Parameters:
+            batch_size      (int): Batch size for loading test data.
+        """
+        return DataLoader(self.public_data, batch_size)
     
