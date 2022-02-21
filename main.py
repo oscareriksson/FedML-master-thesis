@@ -9,8 +9,10 @@ def load_data_loaders(args):
     assert args.dataset in ["mnist", "cifar10", "cifar100"], f"Chosen dataset is not available."
     module = importlib.import_module(f"src.datasets.{args.dataset}")
     data_class_ = getattr(module, args.dataset.title())
+
     dataset = data_class_(args.train_fraction)
-    client_data_loaders = dataset.get_train_data_loaders(args.n_clients, args.distribution, args.alpha, args.train_batch_size)
+    dataset.generate_client_data(args.n_clients, args.distribution, args.alpha)
+    client_data_loaders = dataset.get_train_data_loaders(args.train_batch_size)
     test_data_loader = dataset.get_test_data_loader(args.test_batch_size)
 
     return client_data_loaders, test_data_loader
@@ -35,6 +37,7 @@ def run_job(args, i):
     torch.manual_seed(i)
     client_data_loaders, test_data_loader = load_data_loaders(args)
     model = create_model(args.model_name)
+    
     algorithms = args.algorithm.split("+")
     for alg in algorithms:
         print(alg.upper(), flush=True)
@@ -56,13 +59,13 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=str, default="mnist")
-    parser.add_argument("--algorithm", type=str, default="fedavg+fedprox")
+    parser.add_argument("--algorithm", type=str, default="fedavg")
     parser.add_argument("--n_clients", type=int, default=2, help="Number of clients per round")
     parser.add_argument("--n_times", type=int, default=1)
     parser.add_argument("--n_rounds", type=int, default=1)
     parser.add_argument("--local_epochs", type=int, default=1)
     parser.add_argument("--train_fraction", type=float, default=0.1)
-    parser.add_argument("--distribution", type=str, default="iid")
+    parser.add_argument("--distribution", type=str, default="niid")
     parser.add_argument("--alpha", type=float, default=0.1)
     parser.add_argument("--mu", type=float, default=0.0)
     parser.add_argument("--model_name", type=str, default="mnist_cnn")
