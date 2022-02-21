@@ -7,6 +7,14 @@ import copy
 class ServerBase(ABC):
     """Abstract base class defining datasets."""
     def __init__(self, args, model, train_loaders, test_loader) -> None:
+        """ Constructor method.
+
+            Parameters:
+            args            (dict): Settings for federated setup and local training.
+            model           (nn.Module): Initialized global model.
+            train_loaders   (list): List of client data loaders.
+            test_loader     (torch.util.data.DataLoader): Data loader for test data.
+        """
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.global_model = copy.deepcopy(model).to(self.device)
         self.train_loaders = train_loaders
@@ -24,7 +32,7 @@ class ServerBase(ABC):
         self.round_nr = 0
 
     @abstractmethod
-    def run(self):
+    def run(self, round_nr):
         pass
 
     @abstractmethod
@@ -32,6 +40,9 @@ class ServerBase(ABC):
         pass
 
     def test(self):
+        """ Evaluate global model on test dataset.
+        
+        """
         self.global_model.eval()
         test_losses = []
         test_loss = 0
@@ -50,4 +61,9 @@ class ServerBase(ABC):
             100. * correct / len(self.test_loader.dataset)))
         
     def set_round(self, round_nr):
+        """ Set round number attribute.
+
+            Parameters:
+            round_nr    (int): Current round number.
+        """
         self.round_nr = round_nr

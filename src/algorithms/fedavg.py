@@ -8,13 +8,20 @@ from tqdm import tqdm
 
 
 class FedAvgServer(ServerBase):
+    """ Class defining server for federated averaging (FedAVG).
+    """
     def __init__(self, args, model, train_loaders, test_loader) -> None:
         super().__init__(args, model, train_loaders, test_loader)
 
     def run(self, round_nr):
-        self.set_round(round_nr)
+        """ Do one round of federated training and aggregation.
 
-        # Initialize average weights to zero.
+            Parameters:
+            round_nr    (int): Current round number.
+        """
+
+        self.set_round(round_nr) # This simplifies FedProx inheritance.
+
         avg_weights = OrderedDict()
         for param_name in self.global_model.state_dict().keys():
             avg_weights[param_name] = torch.zeros(self.global_model.state_dict()[param_name].shape)
@@ -27,7 +34,12 @@ class FedAvgServer(ServerBase):
 
         self.global_model.load_state_dict(avg_weights)    
     
-    def _local_training(self, client_nr):
+    def _local_training(self, client_nr):        
+        """ Complete local training at client.
+
+            Parameters:
+            client_nr   (int): ID for the client to do local training at.
+        """
         self.local_model = copy.deepcopy(self.global_model).to(self.device)
         self.local_model.train()
         optimizer = optim.SGD(self.local_model.parameters(), lr=self.lr_rate, momentum=self.momentum)
@@ -51,6 +63,11 @@ class FedAvgServer(ServerBase):
             print("")
     
     def _evaluate_train(self, client_nr):
+        """ Evaluate local model on its private data.
+
+            Parameters:
+            client_nr   (int): ID for the client evaluate.
+        """
         self.local_model.eval()
         correct = 0
         with torch.no_grad():
@@ -61,13 +78,23 @@ class FedAvgServer(ServerBase):
                 correct += (pred == y).sum().item()
         return 100. * correct / len(self.train_loaders[client_nr].dataset)
 
-    def _increment_weighted_average(self, model, model_next, client_nr):
-        """ Update an incremental average. """
+    def _increment_weighted_average(self, weights, weights_next, client_nr):
+        """ Update an incremental average.
+        
+            Parameters:
+            weights         (OrderedDict): Current running average of weights.
+            weights_next    (OrderedDict): New weights from client.
+            client_nr       (int): ID for contributing client.
+        """
         w = OrderedDict()
-        for name in model.keys():
-            #tensorDiff = model_next[name] - model[name]
-            w[name] = model[name] + model_next[name] * self.get_scaling_factor(client_nr)
+        for name in weights.keys():
+            w[name] = weights[name] + weights_next[name] * self.get_scaling_factor(client_nr)
         return w
     
     def get_scaling_factor(self, client_nr):
+        """ Get scaling factor for FedAVG algorithm.
+
+            Parameters:
+            client_nr   (int): ID for client.
+        """
         return self.n_samples_client[client_nr] / self.n_samples_total
