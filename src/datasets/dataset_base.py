@@ -8,6 +8,7 @@ class PytorchDataset:
     def __init__(self, dataset_name) -> None:
         module = importlib.import_module(f"torchvision.datasets")
         self.data_class = getattr(module, dataset_name)
+        self.client_data_indices = []
 
 
     def _sample_train_data(self, train_fraction, transform):
@@ -32,16 +33,9 @@ class PytorchDataset:
 
         return Subset(train_data, chosen_indices)
 
-    def get_train_data_loaders(self, n_clients, distribution, alpha, batch_size):
-        """ Get list of client training data loaders sampled from dirichlet distribution.
-
-            Parameters:
-            n_clients       (int): Number of clients.
-            distribution    (str): iid/non-iid distributed data.
-            alpha           (float): Concentration parameter for dirichlet distribution.
-            batch_size      (int): Batch size for loading training data.
-
-            Returns List[torch.utils.data.DataLoader]
+    def generate_client_data(self, n_clients, distribution, alpha):
+        """ Generate iid client data or non-iid by sampling from Dirichlet distribution.
+        
         """
         labels = np.array([y for (_, y) in self.train_data])
         n_classes = len(np.unique(labels))
@@ -50,8 +44,7 @@ class PytorchDataset:
         # iid: Sample from each class until no samples left.
         if distribution == "iid":
             partition_matrix /= n_clients
-            client_data_loaders = []
-            client_indices = [np.array([], dtype=int) for _ in range(n_clients)]
+            local_sets_indices = [np.array([], dtype=int) for _ in range(n_clients)]
             clients_iter = np.arange(n_clients)
 
             for i in range(n_classes):
@@ -67,11 +60,9 @@ class PytorchDataset:
                             break
                         else:
                             sample_idx = np.random.choice(len(class_indices))
-                            client_indices[j] = np.append(client_indices[j], class_indices[sample_idx])
+                            local_sets_indices[j] = np.append(local_sets_indices[j], class_indices[sample_idx])
                             class_indices = np.delete(class_indices, sample_idx)
 
-            for i in range(n_clients):
-                client_data_loaders.append(DataLoader(Subset(self.train_data, client_indices[i]), batch_size))
         # non-iid: Sample from dirichlet distribution.
         else:
             class_indices = []
@@ -91,11 +82,24 @@ class PytorchDataset:
                     local_sets_indices[client] += list(class_indices[each_class][:local_size])
                     class_indices[each_class] = class_indices[each_class][local_size:]
 
-            client_data_loaders = []
-            for client_indices in local_sets_indices:
+        self.local_sets_indices = local_sets_indices
+
+
+    def get_train_data_loaders(self, batch_size):
+        """ Get list of client training data loaders.
+
+            Parameters:
+            n_clients       (int): Number of clients.
+            distribution    (str): iid/non-iid distributed data.
+            alpha           (float): Concentration parameter for dirichlet distribution.
+            batch_size      (int): Batch size for loading training data.
+
+            Returns List[torch.utils.data.DataLoader]
+        """
+        client_data_loaders = []
+        for client_indices in self.local_sets_indices:
                 np.random.shuffle(client_indices)
                 client_data_loaders.append(DataLoader(Subset(self.train_data, client_indices), batch_size))
-
         return client_data_loaders
     
     def get_test_data_loader(self, batch_size):
