@@ -6,6 +6,11 @@ from torch.utils.data import DataLoader, Subset
 class PytorchDataset:
     """Base class defining pytorch datasets."""
     def __init__(self, dataset_name) -> None:
+        """ Constructor method.
+
+            Parameters:
+            dataset_name    (str): Name of dataset to use.
+        """
         module = importlib.import_module(f"torchvision.datasets")
         self.data_class = getattr(module, dataset_name)
         self.client_data_indices = []
@@ -35,7 +40,11 @@ class PytorchDataset:
 
     def generate_client_data(self, n_clients, distribution, alpha):
         """ Generate iid client data or non-iid by sampling from Dirichlet distribution.
-        
+
+            Parameters:
+            n_clients       (int): Number of clients.
+            distribution    (str): Indicator to sample iid or non-iid.
+            alpha           (float): Concentration parameter for Dirichlet distribution.
         """
         labels = np.array([y for (_, y) in self.train_data])
         n_classes = len(np.unique(labels))

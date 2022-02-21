@@ -5,6 +5,8 @@ import torch.nn.functional as F
 
 
 class FedProxServer(FedAvgServer):
+    """ Class defining server for federated learning with the FedProx algorithm.
+    """
     def __init__(self, args, model, train_loaders, test_loader):
         super().__init__(args, model, train_loaders, test_loader)
 
@@ -12,6 +14,11 @@ class FedProxServer(FedAvgServer):
         self.loss_function = self._fedprox_loss()
     
     def _fedprox_loss(self):
+        """ Get FedProx loss function.
+
+            Returns:
+            torch.nn.CrossEntropyLoss
+        """
         loss = nn.CrossEntropyLoss()
 
         if self.round_nr > 0:
