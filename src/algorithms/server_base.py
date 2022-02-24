@@ -11,9 +11,10 @@ class ServerBase(ABC):
 
             Parameters:
             args            (dict): Settings for federated setup and local training.
-            model           (nn.Module): Initialized global model.
+            model           (torch.nn.Module): Initialized global model.
             train_loaders   (list): List of client data loaders.
             test_loader     (torch.util.data.DataLoader): Data loader for test data.
+            public_loader     (torch.util.data.DataLoader): Data loader for public data.
         """
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.global_model = copy.deepcopy(model).to(self.device)
@@ -32,7 +33,7 @@ class ServerBase(ABC):
         self.round_nr = 0
 
     @abstractmethod
-    def run(self, round_nr):
+    def run(self):
         pass
 
     @abstractmethod
