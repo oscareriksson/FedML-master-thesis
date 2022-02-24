@@ -13,26 +13,30 @@ class FedAvgServer(ServerBase):
     def __init__(self, args, model, train_loaders, test_loader) -> None:
         super().__init__(args, model, train_loaders, test_loader)
 
-    def run(self, round_nr):
+    def run(self, test=True):
         """ Do one round of federated training and aggregation.
 
             Parameters:
             round_nr    (int): Current round number.
         """
+        for i in range(self.n_rounds):
+            print("== Round {} ==".format(i+1), flush=True)
+            self.set_round(i) # This simplifies FedProx inheritance.
 
-        self.set_round(round_nr) # This simplifies FedProx inheritance.
+            avg_weights = OrderedDict()
+            for param_name in self.global_model.state_dict().keys():
+                avg_weights[param_name] = torch.zeros(self.global_model.state_dict()[param_name].shape)
+            
+            for j in range(self.n_clients):
+                print("-- Training client nr {} --".format(j+1))
+                self._local_training(j)
 
-        avg_weights = OrderedDict()
-        for param_name in self.global_model.state_dict().keys():
-            avg_weights[param_name] = torch.zeros(self.global_model.state_dict()[param_name].shape)
-        
-        for j in range(self.n_clients):
-            print("-- Training client nr {} --".format(j+1))
-            self._local_training(j)
+                avg_weights = self._increment_weighted_average(avg_weights, self.local_model.state_dict(), j)
 
-            avg_weights = self._increment_weighted_average(avg_weights, self.local_model.state_dict(), j)
+            self.global_model.load_state_dict(avg_weights)
 
-        self.global_model.load_state_dict(avg_weights)    
+            if test:
+                self.test()
     
     def _local_training(self, client_nr):        
         """ Complete local training at client.
