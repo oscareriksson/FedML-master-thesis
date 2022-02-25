@@ -14,7 +14,9 @@ def load_data_loaders(args):
     dataset.generate_client_data(args.n_clients, args.distribution, args.alpha)
 
     public_data_loader = None
-    if args.algorithm in ["feded"]:
+    algs = args.algorithm.split("+")
+    ens_algs = ["feded"]
+    if any(alg in algs for alg in ens_algs):
         dataset.split_test_public(args.n_samples_public)
         public_data_loader = dataset.get_public_data_loader(args.public_batch_size)
 
@@ -34,7 +36,7 @@ def create_server(alg, args, model, client_loaders, test_loader, public_loader):
 
     elif alg == "feded":
         from src.algorithms.feded import FedEdServer
-        server = FedProxServer(args, model, client_loaders, test_loader, public_loader)
+        server = FedEdServer(args, model, client_loaders, test_loader, public_loader)
         
     else:
         print("Chosen algorithm is not supported.")
@@ -65,25 +67,29 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", type=str, default="mnist")
-    parser.add_argument("--algorithm", type=str, default="fedavg")
+    parser.add_argument("--dataset", type=str, default="cifar10")
+    parser.add_argument("--algorithm", type=str, default="feded")
     parser.add_argument("--n_clients", type=int, default=2, help="Number of clients per round")
     parser.add_argument("--n_times", type=int, default=1)
     parser.add_argument("--n_rounds", type=int, default=1)
     parser.add_argument("--local_epochs", type=int, default=1)
-    parser.add_argument("--train_fraction", type=float, default=0.1)
+    parser.add_argument("--train_fraction", type=float, default=0.05)
     parser.add_argument("--distribution", type=str, default="iid")
     parser.add_argument("--alpha", type=float, default=0.1)
     parser.add_argument("--mu", type=float, default=0.0)
-    parser.add_argument("--model_name", type=str, default="mnist_cnn")
+    parser.add_argument("--model_name", type=str, default="cifar10_cnn")
     parser.add_argument("--train_batch_size", type=int, default=64)
     parser.add_argument("--test_batch_size", type=int, default=64)
     parser.add_argument("--learning_rate", type=float, default=0.001, help="Local learning rate")
     parser.add_argument("--momentum", type=float, default=0.9, help="Local momentum")
     parser.add_argument("--evaluate_train", type=bool, default=True, help="Do evaluation of local training")
 
-    parser.add_argument("--n_samples_public", type=int, default=400)
+    # Ensemble parameters
+    parser.add_argument("--local_epochs_ensemble", type=int, default=1)
+    parser.add_argument("--n_samples_public", type=int, default=1000)
     parser.add_argument("--public_batch_size", type=int, default=64)
+    parser.add_argument("--student_batch_size", type=int, default=16)
+    parser.add_argument("--student_epochs", type=int, default=60)
 
     args = parser.parse_args()
 

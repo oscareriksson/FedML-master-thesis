@@ -6,7 +6,7 @@ import copy
 
 class ServerBase(ABC):
     """Abstract base class defining datasets."""
-    def __init__(self, args, model, train_loaders, test_loader) -> None:
+    def __init__(self, args, model, train_loaders, test_loader, public_loader=None) -> None:
         """ Constructor method.
 
             Parameters:
@@ -20,7 +20,9 @@ class ServerBase(ABC):
         self.global_model = copy.deepcopy(model).to(self.device)
         self.train_loaders = train_loaders
         self.test_loader = test_loader
+        self.public_loader = public_loader
         self.local_model = None
+        self.dataset_name = args.dataset
         self.n_clients = args.n_clients
         self.n_rounds = args.n_rounds
         self.lr_rate = args.learning_rate
@@ -29,6 +31,7 @@ class ServerBase(ABC):
         self.loss_function = nn.CrossEntropyLoss()
         self.n_samples_client = [len(data_loader.dataset) for data_loader in train_loaders]
         self.n_samples_total = sum(self.n_samples_client)
+        self.n_samples_public = args.n_samples_public
         self.evaluate_train = args.evaluate_train
         self.round_nr = 0
 
