@@ -3,16 +3,28 @@ import torch.nn as nn
 import torch.nn.functional as F
 import sys
 
-def create_model(model_name):
-    if "mnist_cnn" in model_name:
-        return Mnist_Cnn()
-    elif "cifar10_cnn" in model_name:
-        return Cifar_Cnn(10)
-    elif "cifar100_cnn" in model_name:
-        return Cifar_Cnn(100)
+def create_model(model_name, student=False):
+    if not student:
+        if model_name == "mnist_cnn":
+            return Mnist_Cnn()
+        elif model_name == "cifar10_cnn":
+            return Cifar_Cnn(10)
+        elif model_name == "cifar100_cnn":
+            return Cifar_Cnn(100)
+        else:
+            print("Model name is not supported.")
+            sys.exit()
     else:
-        print("Model name is not supported.")
-        sys.exit()
+        if model_name == "mnist":
+            return Mnist_Student()
+        elif model_name == "cifar10":
+            return Cifar_Student(10)
+        elif model_name == "cifar100":
+            return Cifar_Student(100)
+        else:
+            print("Model name is not supported.")
+            sys.exit()
+
 
 
 class Mnist_Cnn(nn.Module):
@@ -68,12 +80,12 @@ class Mnist_Student(nn.Module):
         x = self.fc1(x)
         return x
 
-class Cifar10_Student(nn.Module):
-    def __init__(self):
-        super().__init__()
+class Cifar_Student(nn.Module):
+    def __init__(self, n_classes):
+        super(Cifar_Student, self).__init__()
         self.conv1 = nn.Conv2d(3, 8, 5, 1, 2)
         self.pool = nn.MaxPool2d(4)
-        self.fc1 = nn.Linear(8 * 8 * 8, 10)
+        self.fc1 = nn.Linear(8 * 8 * 8, n_classes)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))

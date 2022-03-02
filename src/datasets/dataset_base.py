@@ -34,12 +34,15 @@ class PytorchDataset:
             train=True, 
             transform=transform, 
             download=True)
-        n_samples = len(train_data.targets)
-        index_limit = int(train_fraction * n_samples)
-        chosen_indices = np.random.choice(torch.arange(n_samples), size=index_limit, replace=False)
-        print(f"\nUsing {index_limit} training samples\n", flush=True)
-
-        return Subset(train_data, chosen_indices)
+        if train_fraction is None:
+            return train_data
+        else:
+            n_samples = len(train_data.targets)
+            index_limit = int(train_fraction * n_samples)
+            chosen_indices = np.random.choice(torch.arange(n_samples), size=index_limit, replace=False)
+            print(f"\nUsing {index_limit} training samples\n", flush=True)
+            return Subset(train_data, chosen_indices)
+        
 
     def generate_client_data(self, n_clients, distribution, alpha):
         """ Generate iid client data or non-iid by sampling from Dirichlet distribution.
@@ -152,4 +155,34 @@ class PytorchDataset:
             batch_size      (int): Batch size for loading test data.
         """
         return DataLoader(self.public_data, batch_size)
+    
+    def get_local_sets_indices(self):
+        """
+        """
+        return self.local_sets_indices
+
+    def get_test_indices(self):
+        """
+        """
+        return self.test_data.indices
+
+    def get_public_indices(self):
+        """
+        """
+        return self.public_data.indices
+
+    def set_local_sets_indices(self, local_sets_indices):
+        """
+        """
+        self.local_sets_indices = local_sets_indices
+    
+    def set_test_indices(self, test_indices):
+        """
+        """
+        self.test_data.indices = test_indices
+
+    def set_public_indices(self, public_indices):
+        """
+        """
+        self.public_data.indices = public_indices
     

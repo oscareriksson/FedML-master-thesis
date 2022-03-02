@@ -3,10 +3,11 @@ from abc import ABC, abstractmethod
 import torch
 import torch.nn as nn
 import copy
+import numpy as np
 
 class ServerBase(ABC):
     """Abstract base class defining datasets."""
-    def __init__(self, args, model, train_loaders, test_loader, public_loader=None) -> None:
+    def __init__(self, args, model, train_loaders, test_loader, public_loader=None, run_folder=None) -> None:
         """ Constructor method.
 
             Parameters:
@@ -23,6 +24,7 @@ class ServerBase(ABC):
         self.public_loader = public_loader
         self.local_model = None
         self.dataset_name = args.dataset
+        self.n_classes = len(np.unique(self.test_loader.dataset.targets))
         self.n_clients = args.n_clients
         self.n_rounds = args.n_rounds
         self.lr_rate = args.learning_rate
@@ -34,6 +36,9 @@ class ServerBase(ABC):
         self.n_samples_public = args.n_samples_public
         self.evaluate_train = args.evaluate_train
         self.round_nr = 0
+        self.run_folder = run_folder
+        self.test_acc = []
+        self.test_loss = []
 
     @abstractmethod
     def run(self):
@@ -48,21 +53,23 @@ class ServerBase(ABC):
         
         """
         self.global_model.eval()
-        test_losses = []
-        test_loss = 0
+        test_loss = []
         correct = 0
         with torch.no_grad():
             for x, y in self.test_loader:
                 x, y = x.to(self.device), y.to(self.device)
                 output = self.global_model(x)
-                test_loss += self.loss_function(output, y).item()
+                error = self.loss_function(output, y)
+                test_loss.append(error.item())
                 _, pred = torch.max(output.data, 1)
                 correct += (pred == y).sum().item()
-        test_loss /= len(self.test_loader.dataset)
-        test_losses.append(test_loss)
+        avg_loss = sum(test_loss) / len(test_loss)
+        accuracy = 100. * correct / len(self.test_loader.dataset)
+        self.test_loss.append(avg_loss)
+        self.test_acc.append(accuracy)
         print('\nGlobal Model Test: Avg. loss: {:.4f}, Accuracy: {:.0f}%\n'.format(
-            test_loss,
-            100. * correct / len(self.test_loader.dataset)))
+            avg_loss,
+            accuracy))
         
     def set_round(self, round_nr):
         """ Set round number attribute.
@@ -71,3 +78,10 @@ class ServerBase(ABC):
             round_nr    (int): Current round number.
         """
         self.round_nr = round_nr
+    
+    def _save_results(self):
+        with open(f"{self.run_folder}/test_accuracy.npy", "wb") as f:
+            np.save(f, np.array(self.test_acc))
+        
+        with open(f"{self.run_folder}/test_loss.npy", "wb") as f:
+            np.save(f, np.array(self.test_loss))

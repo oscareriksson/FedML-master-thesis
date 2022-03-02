@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from ..models.models import Mnist_Student
+from ..models.models import create_model
 from ..datasets.dataset_student import StudentData
 import sys
 
@@ -14,8 +14,8 @@ import sys
 class FedEdServer(ServerBase):
     """ Class defining server for federated ensemble distillation.
     """
-    def __init__(self, args, model, train_loaders, test_loader, public_loader) -> None:
-        super().__init__(args, model, train_loaders, test_loader, public_loader)
+    def __init__(self, args, model, train_loaders, test_loader, public_loader, run_folder) -> None:
+        super().__init__(args, model, train_loaders, test_loader, public_loader, run_folder)
 
         self.logits_local = None
         self.local_epochs_ensemble = args.local_epochs_ensemble
@@ -28,20 +28,22 @@ class FedEdServer(ServerBase):
             Parameters:
             round_nr    (int): Current round number.
         """
+        for round in range(self.n_rounds):
+            print("== Round {} ==".format(round+1), flush=True)
+            logits_ensemble = torch.zeros(self.n_samples_public, self.n_classes)
+            
+            for j in range(self.n_clients):
+                print("-- Training client nr {} --".format(j+1))
 
-        logits_ensemble = torch.zeros(self.n_samples_public, 10)
-        
-        for j in range(self.n_clients):
-            print("-- Training client nr {} --".format(j+1))
+                self._local_training(j)
+                logits_local = self._get_local_logits()
 
-            self._local_training(j)
-            logits_local = self._get_local_logits()
+                logits_ensemble = self._increment_logits_ensemble(logits_ensemble, logits_local, j)
 
-            logits_ensemble = self._increment_logits_ensemble(logits_ensemble, logits_local, j)
-
-        student_loader = self._get_student_data_loader(logits_ensemble)
-        self._train_student(student_loader)
-        self.test()
+            student_loader = self._get_student_data_loader(logits_ensemble)
+            self._train_student(student_loader)
+            self.test()
+            self._save_results()
     
     def _local_training(self, client_nr):        
         """ Complete local training at client.
@@ -68,7 +70,8 @@ class FedEdServer(ServerBase):
         
         print("Training completed")
         if self.evaluate_train:
-            print("Training Accuracy: {:.0f}%\n".format(self._evaluate_train(client_nr)), flush=True)
+            acc, loss = self._evaluate_train(client_nr)
+            print("Train accuracy: {:.0f}%  Train loss: {:.4f}\n".format(acc, loss), flush=True)
         else:
             print("")
     
@@ -80,17 +83,20 @@ class FedEdServer(ServerBase):
         """
         self.local_model.eval()
         correct = 0
+        train_loss = []
         with torch.no_grad():
             for x, y in self.train_loaders[client_nr]:
                 x, y = x.to(self.device), y.to(self.device)
                 output = self.local_model(x)
+                error = self.loss_function(output, y)
+                train_loss.append(error.item())
                 _, pred = torch.max(output.data, 1)
                 correct += (pred == y).sum().item()
-        return 100. * correct / len(self.train_loaders[client_nr].dataset)
+        return 100. * correct / self.n_samples_client[client_nr], sum(train_loss) / len(train_loss)
     
     def _train_student(self, student_loader):
         print("-- Training student model --", flush=True)
-        model = Mnist_Student()
+        model = create_model(self.dataset_name, student=True)
         loss_function = nn.MSELoss()
         optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
@@ -126,17 +132,6 @@ class FedEdServer(ServerBase):
         student_dataset = StudentData(self.public_loader.dataset, student_targets)
         return DataLoader(student_dataset, self.student_batch_size)
 
-    def _get_student_model(self):
-        if self.dataset_name == "mnist":
-            from ..models.models import Mnist_Student
-            return Mnist_Student()
-        elif self.dataset_name == "cifar10":
-            from ..models.models import Cifar10_Student
-            return Cifar10_Student()
-        else:
-            print("Student model not implemented for this dataset.", flush=True)
-            sys.exit()
-
     
     def _get_scaling_factor(self, client_nr):
         """ Get scaling factor for FedAVG algorithm.
@@ -164,7 +159,7 @@ class FedEdServer(ServerBase):
         """
         """
         n_samples_public_test = len(self.public_loader.dataset) + len(self.test_loader.dataset)
-        targets = torch.zeros(n_samples_public_test, 10)
+        targets = torch.zeros(n_samples_public_test, self.n_classes)
         for i in range(self.n_samples_public):
             idx_public = self.public_loader.dataset.indices[i]
             targets[idx_public] = logits_ensemble[i]
