@@ -97,6 +97,7 @@ class FedEdServer(ServerBase):
     def _train_student(self, student_loader):
         print("-- Training student model --", flush=True)
         model = create_model(self.dataset_name, student=True)
+        model.to(self.device)
         loss_function = nn.MSELoss()
         optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
@@ -105,8 +106,9 @@ class FedEdServer(ServerBase):
             train_loss = []
             for x, y in tqdm(student_loader,
                             leave=False,
-                            desc=f"Epoch {epoch+1}/{self.student_epochs}", 
-                            bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}"):
+                            desc=f"Epoch {epoch+1}/{self.student_epochs}"): 
+                            #bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}"):
+                x, y = x.to(self.device), y.to(self.device)
                 optimizer.zero_grad()
                 output = model(x)
                 loss = loss_function(output, y)
@@ -148,6 +150,7 @@ class FedEdServer(ServerBase):
         logits_local = None
         with torch.no_grad():
             for x, _ in self.public_loader:
+                x.to(self.device)
                 if logits_local is None:
                     logits_local = F.softmax(self.local_model(x), dim=1)
                 else:
