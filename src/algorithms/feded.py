@@ -156,7 +156,7 @@ class FedEdServer(ServerBase):
                 else:
                     logits_local = torch.cat((logits_local, F.softmax(self.local_model(x), dim=1)))
 
-        return logits_local
+        return logits_local.to(self.device)
     
     def _get_student_targets(self, logits_ensemble):
         """
