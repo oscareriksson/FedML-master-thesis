@@ -59,8 +59,8 @@ class FedEdServer(ServerBase):
             for x, y in tqdm(
                 self.train_loaders[client_nr],
                 leave=False,
-                desc=f"Epoch {i+1}/{self.local_epochs_ensemble}", 
-                bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}"):
+                desc=f"Epoch {i+1}/{self.local_epochs_ensemble}"):
+                #bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}"):
                 x, y = x.to(self.device), y.to(self.device)
                 optimizer.zero_grad()
                 output = self.local_model(x)
