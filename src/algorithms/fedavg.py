@@ -25,7 +25,7 @@ class FedAvgServer(ServerBase):
 
             avg_weights = OrderedDict()
             for param_name in self.global_model.state_dict().keys():
-                avg_weights[param_name] = torch.zeros(self.global_model.state_dict()[param_name].shape)
+                avg_weights[param_name] = torch.zeros(self.global_model.state_dict()[param_name].shape).to(self.device)
             
             for j in range(self.n_clients):
                 print("-- Training client nr {} --".format(j+1))
