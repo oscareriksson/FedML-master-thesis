@@ -1,3 +1,4 @@
+from zmq import device
 from .server_base import ServerBase
 import copy
 import torch.optim as optim
@@ -30,7 +31,7 @@ class FedEdServer(ServerBase):
         """
         for round in range(self.n_rounds):
             print("== Round {} ==".format(round+1), flush=True)
-            logits_ensemble = torch.zeros(self.n_samples_public, self.n_classes)
+            logits_ensemble = torch.zeros(self.n_samples_public, self.n_classes, device=self.device)
             
             for j in range(self.n_clients):
                 print("-- Training client nr {} --".format(j+1))
