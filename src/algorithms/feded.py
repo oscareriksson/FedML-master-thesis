@@ -150,7 +150,7 @@ class FedEdServer(ServerBase):
         logits_local = None
         with torch.no_grad():
             for x, _ in self.public_loader:
-                x.to(self.device)
+                x = x.to(self.device)
                 if logits_local is None:
                     logits_local = F.softmax(self.local_model(x), dim=1)
                 else:
