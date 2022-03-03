@@ -10,8 +10,8 @@ from tqdm import tqdm
 class FedAvgServer(ServerBase):
     """ Class defining server for federated averaging (FedAVG).
     """
-    def __init__(self, args, model, train_loaders, test_loader) -> None:
-        super().__init__(args, model, train_loaders, test_loader)
+    def __init__(self, args, model, run_folder, train_loaders, test_loader) -> None:
+        super().__init__(args, model, run_folder, train_loaders, test_loader)
 
     def run(self, test=True):
         """ Do one round of federated training and aggregation.
@@ -19,6 +19,8 @@ class FedAvgServer(ServerBase):
             Parameters:
             round_nr    (int): Current round number.
         """
+        local_accs, local_losses = [[] for _ in range(self.n_clients)], [[] for _ in range(self.n_clients)]
+        test_accs, test_losses = [], []
         for i in range(self.n_rounds):
             print("== Round {} ==".format(i+1), flush=True)
             self.set_round(i) # This simplifies FedProx inheritance.
@@ -29,14 +31,24 @@ class FedAvgServer(ServerBase):
             
             for j in range(self.n_clients):
                 print("-- Training client nr {} --".format(j+1))
-                self._local_training(j)
+                acc, loss = self._local_training(j)
+                local_accs[j].append(acc)
+                local_losses[j].append(loss)
 
                 avg_weights = self._increment_weighted_average(avg_weights, self.local_model.state_dict(), j)
 
             self.global_model.load_state_dict(avg_weights)
 
-            if test:
-                self.test()
+            test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
+            print('\nGlobal Model Test: Avg. loss: {:.4f}, Accuracy: {:.0f}%\n'.format(
+                test_loss,
+                test_acc))
+
+            test_accs.append(test_acc)
+            test_losses.append(test_loss)
+        self._save_results(local_accs, "client_accuracy")
+        self._save_results(local_losses, "client_loss")    
+        self._save_results([test_accs, test_losses], f"fedavg_test_results")
     
     def _local_training(self, client_nr):        
         """ Complete local training at client.
@@ -53,7 +65,6 @@ class FedAvgServer(ServerBase):
                 self.train_loaders[client_nr],
                 leave=False,
                 desc=f"Epoch {i+1}/{self.local_epochs}"): 
-                #bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}"):
                 x, y = x.to(self.device), y.to(self.device)
                 optimizer.zero_grad()
                 output = self.local_model(x)
@@ -61,10 +72,8 @@ class FedAvgServer(ServerBase):
                 error.backward()
                 optimizer.step()
         print("Training completed")
-        if self.evaluate_train:
-            print("Training Accuracy: {:.0f}%\n".format(self._evaluate_train(client_nr)), flush=True)
-        else:
-            print("")
+        train_acc, train_loss = self.evaluate(self.local_model, self.train_loaders[client_nr])
+        return train_acc, train_loss
     
     def _evaluate_train(self, client_nr):
         """ Evaluate local model on its private data.
@@ -101,4 +110,4 @@ class FedAvgServer(ServerBase):
             Parameters:
             client_nr   (int): ID for client.
         """
-        return self.n_samples_client[client_nr] / self.n_samples_total
+        return self.n_samples_client[client_nr] / sum(self.n_samples_client)

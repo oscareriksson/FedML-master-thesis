@@ -25,10 +25,10 @@ def initialize_data(args):
     dataset.generate_client_data(args.n_clients, args.distribution, args.alpha)
     local_indices = dataset.get_local_sets_indices()
 
-    dataset.split_test_public(args.n_samples_public)
-    test_indices, public_indices = dataset.get_test_indices(), dataset.get_public_indices()
+    dataset.split_test_public(args.n_samples_public, args.public_val_fraction)
+    test_indices, (public_train_indices, public_val_indices) = dataset.get_test_indices(), dataset.get_public_indices()
 
-    return local_indices, test_indices, public_indices
+    return local_indices, test_indices, public_train_indices, public_val_indices
 
 
 
@@ -40,13 +40,16 @@ def main(args):
     init_model = create_model(args.model_name)
     torch.save(init_model, f"{settings_folder}/model")
     
-    local_indices, test_indices, public_indices = initialize_data(args)
+    local_indices, test_indices, public_train_indices, public_val_indices = initialize_data(args)
 
     with open(f'{settings_folder}/data_splits.npy', 'wb') as f:
         np.save(f, test_indices)
-        np.save(f, public_indices)
+        np.save(f, public_train_indices)
+        np.save(f, public_val_indices)
         for indices in local_indices:
             np.save(f, indices)
+    
+    print(f"Saved settings in: {settings_folder}")
 
 
 if __name__ == "__main__":
@@ -55,11 +58,12 @@ if __name__ == "__main__":
     parser.add_argument("--model_name", type=str, default="mnist_cnn")
     parser.add_argument("--n_clients", type=int, default=5, help="Number of clients per round")
     parser.add_argument("--train_fraction", type=float, default=0.1)
-    parser.add_argument("--distribution", type=str, default="niid")
+    parser.add_argument("--distribution", type=str, default="iid")
     parser.add_argument("--alpha", type=float, default=0.1)
 
     # Ensemble parameters
     parser.add_argument("--n_samples_public", type=int, default=1000)
+    parser.add_argument("--public_val_fraction", type=float, default=0.2)
 
     args = parser.parse_args()
 

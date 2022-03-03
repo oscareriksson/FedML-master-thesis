@@ -9,19 +9,20 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from ..models.models import create_model
 from ..datasets.dataset_student import StudentData
-import sys
+import numpy as np
 
 
 class FedEdServer(ServerBase):
     """ Class defining server for federated ensemble distillation.
     """
-    def __init__(self, args, model, train_loaders, test_loader, public_loader, run_folder) -> None:
-        super().__init__(args, model, train_loaders, test_loader, public_loader, run_folder)
+    def __init__(self, args, model, run_folder, train_loaders, test_loader, public_train_loader, public_val_loader) -> None:
+        super().__init__(args, model, run_folder, train_loaders, test_loader, public_train_loader, public_val_loader)
 
         self.logits_local = None
         self.local_epochs_ensemble = args.local_epochs_ensemble
         self.student_batch_size = args.student_batch_size
         self.student_epochs = args.student_epochs
+        self.n_samples_train_public = len(public_train_loader.dataset.indices)
 
     def run(self):
         """ Execute federated training and distillation.
@@ -29,22 +30,31 @@ class FedEdServer(ServerBase):
             Parameters:
             round_nr    (int): Current round number.
         """
-        for round in range(self.n_rounds):
-            print("== Round {} ==".format(round+1), flush=True)
-            logits_ensemble = torch.zeros(self.n_samples_public, self.n_classes, device=self.device)
-            
-            for j in range(self.n_clients):
-                print("-- Training client nr {} --".format(j+1))
+        logits_ensemble = torch.zeros(self.n_samples_train_public, self.n_classes, device=self.device)
+        local_accs, local_losses = [], []
+        for j in range(self.n_clients):
+            print("-- Training client nr {} --".format(j+1))
 
-                self._local_training(j)
-                logits_local = self._get_local_logits()
+            accs, losses = self._local_training(j)
+            local_accs.extend([accs])
+            local_losses.extend([losses])
+            logits_local = self._get_local_logits()
 
-                logits_ensemble = self._increment_logits_ensemble(logits_ensemble, logits_local, j)
+            logits_ensemble = self._increment_logits_ensemble(logits_ensemble, logits_local, j)
 
-            student_loader = self._get_student_data_loader(logits_ensemble)
-            self._train_student(student_loader)
-            self.test()
-            self._save_results()
+        self._save_results(local_accs, "client_accuracy")
+        self._save_results(local_losses, "client_loss")
+
+        student_loader = self._get_student_data_loader(logits_ensemble)
+        self._train_student(student_loader)
+
+        test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
+    
+        self._save_results([test_acc, test_loss], f"student_test_results")
+
+        print('\nStudent Model Test: Avg. loss: {:.4f}, Accuracy: {:.0f}%\n'.format(
+        test_loss,
+        test_acc))
     
     def _local_training(self, client_nr):        
         """ Complete local training at client.
@@ -55,45 +65,26 @@ class FedEdServer(ServerBase):
         self.local_model = copy.deepcopy(self.global_model).to(self.device)
         self.local_model.train()
         optimizer = optim.SGD(self.local_model.parameters(), lr=self.lr_rate, momentum=self.momentum)
-
+        train_accs, train_losses = [], []
         for i in range(self.local_epochs_ensemble):
             for x, y in tqdm(
                 self.train_loaders[client_nr],
                 leave=False,
                 desc=f"Epoch {i+1}/{self.local_epochs_ensemble}"):
-                #bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}"):
                 x, y = x.to(self.device), y.to(self.device)
                 optimizer.zero_grad()
                 output = self.local_model(x)
                 error = self.loss_function(output, y)
                 error.backward()
                 optimizer.step()
-        
-        print("Training completed")
-        if self.evaluate_train:
-            acc, loss = self._evaluate_train(client_nr)
-            print("Train accuracy: {:.0f}%  Train loss: {:.4f}\n".format(acc, loss), flush=True)
-        else:
-            print("")
-    
-    def _evaluate_train(self, client_nr):
-        """ Evaluate local model on its private data.
+            train_acc, train_loss = self.evaluate(self.local_model, self.train_loaders[client_nr])
+            train_accs.append(train_acc)
+            train_losses.append(train_loss)
 
-            Parameters:
-            client_nr   (int): ID for the client evaluate.
-        """
-        self.local_model.eval()
-        correct = 0
-        train_loss = []
-        with torch.no_grad():
-            for x, y in self.train_loaders[client_nr]:
-                x, y = x.to(self.device), y.to(self.device)
-                output = self.local_model(x)
-                error = self.loss_function(output, y)
-                train_loss.append(error.item())
-                _, pred = torch.max(output.data, 1)
-                correct += (pred == y).sum().item()
-        return 100. * correct / self.n_samples_client[client_nr], sum(train_loss) / len(train_loss)
+        print("Training completed")
+        print("Train accuracy: {:.0f}%  Train loss: {:.4f}\n".format(train_acc, train_loss), flush=True)
+
+        return train_accs, train_losses
     
     def _train_student(self, student_loader):
         print("-- Training student model --", flush=True)
@@ -101,22 +92,29 @@ class FedEdServer(ServerBase):
         model.to(self.device)
         loss_function = nn.MSELoss()
         optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-
+        train_accs, train_losses, val_accs, val_losses = [], [], [], []
         model.train()
         for epoch in range(self.student_epochs):
-            train_loss = []
-            for x, y in tqdm(student_loader,
-                            leave=False,
-                            desc=f"Epoch {epoch+1}/{self.student_epochs}"): 
-                            #bar_format="{l_bar}{bar:10}{r_bar}{bar:-10b}"):
+            for x, y in student_loader:
                 x, y = x.to(self.device), y.to(self.device)
                 optimizer.zero_grad()
                 output = model(x)
                 loss = loss_function(output, y)
                 loss.backward()
                 optimizer.step()
-        
+            train_acc, train_loss = self.evaluate(model, self.public_train_loader)
+            val_acc, val_loss = self.evaluate(model, self.public_val_loader)
+
+            train_accs.append(train_acc)
+            train_losses.append(train_loss)
+            val_accs.append(val_acc)
+            val_losses.append(val_loss)
+
+            print("Epoch {}/{} Train accuracy: {:.0f}%  Train loss: {:.4f} Val accuracy: {:.0f}%  Val loss: {:.4f}".format(
+                epoch+1, self.student_epochs, train_acc, train_loss, val_acc, val_loss), end="\r", flush=True)
+
         self.global_model = model
+        self._save_results([train_accs, train_losses, val_accs, val_losses], 'student_train_results')
 
     def _increment_logits_ensemble(self, logits_ensemble, logits_local, client_nr):
         """ Update the ensembled logits on public dataset.
@@ -132,7 +130,7 @@ class FedEdServer(ServerBase):
         """
         """
         student_targets = self._get_student_targets(logits_ensemble)
-        student_dataset = StudentData(self.public_loader.dataset, student_targets)
+        student_dataset = StudentData(self.public_train_loader.dataset, student_targets)
         return DataLoader(student_dataset, self.student_batch_size)
 
     
@@ -142,7 +140,7 @@ class FedEdServer(ServerBase):
             Parameters:
             client_nr   (int): ID for client.
         """
-        return self.n_samples_client[client_nr] / self.n_samples_total
+        return self.n_samples_client[client_nr] / sum(self.n_samples_client)
 
     def _get_local_logits(self):
         """
@@ -150,7 +148,7 @@ class FedEdServer(ServerBase):
         self.local_model.eval()
         logits_local = None
         with torch.no_grad():
-            for x, _ in self.public_loader:
+            for x, _ in self.public_train_loader:
                 x = x.to(self.device)
                 if logits_local is None:
                     logits_local = F.softmax(self.local_model(x), dim=1)
@@ -162,10 +160,10 @@ class FedEdServer(ServerBase):
     def _get_student_targets(self, logits_ensemble):
         """
         """
-        n_samples_public_test = len(self.public_loader.dataset) + len(self.test_loader.dataset)
-        targets = torch.zeros(n_samples_public_test, self.n_classes)
-        for i in range(self.n_samples_public):
-            idx_public = self.public_loader.dataset.indices[i]
+        n_total_samples = len(self.test_loader.dataset.data)
+        targets = torch.zeros(n_total_samples, self.n_classes)
+        for i in range(self.n_samples_train_public):
+            idx_public = self.public_train_loader.dataset.indices[i]
             targets[idx_public] = logits_ensemble[i]
         
         return targets
