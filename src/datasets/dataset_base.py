@@ -54,7 +54,7 @@ class PytorchDataset:
             distribution    (str): Indicator to sample iid or non-iid.
             alpha           (float): Concentration parameter for Dirichlet distribution.
         """
-        labels = np.array([y for (_, y) in self.train_data])
+        labels = np.array([target for target in self.train_data.dataset.targets])
         n_classes = len(np.unique(labels))
         partition_matrix = np.ones((n_classes, n_clients))
 
@@ -94,7 +94,7 @@ class PytorchDataset:
                 sample_size = len(class_indices[each_class])
                 for client in range(n_clients):
                     np.random.shuffle(class_indices[each_class])
-                    local_size = int(np.floor(partition_matrix[each_class, client] * sample_size))
+                    local_size = int(partition_matrix[each_class, client] * sample_size)
                     local_sets_indices[client] += list(class_indices[each_class][:local_size])
                     class_indices[each_class] = class_indices[each_class][local_size:]
 
