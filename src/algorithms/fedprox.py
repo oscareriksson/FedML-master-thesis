@@ -7,8 +7,8 @@ import torch.nn.functional as F
 class FedProxServer(FedAvgServer):
     """ Class defining server for federated learning with the FedProx algorithm.
     """
-    def __init__(self, args, model, train_loaders, test_loader):
-        super().__init__(args, model, train_loaders, test_loader)
+    def __init__(self, args, model, run_folder, train_loaders, test_loader):
+        super().__init__(args, model, run_folder, train_loaders, test_loader)
 
         self.mu = args.mu
         self.loss_function = self._fedprox_loss()
