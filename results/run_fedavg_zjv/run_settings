@@ -1,6 +1,6 @@
 settings_file mnist_c10_f1.0_niid_a0.1_npub5000_zjv
 algorithm fedavg
-n_rounds 50
+n_rounds 30
 local_epochs 1
 mu 0.0
 train_batch_size 64
