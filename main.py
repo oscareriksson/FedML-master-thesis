@@ -84,13 +84,15 @@ def main(args):
     server = create_server(args, model, client_data_loaders, test_data_loader, public_train_loader, public_val_loader, run_folder)
     server.run()
 
+    print(f"Results saved in: {run_folder}")
+
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--settings_file", type=str, default="mnist_c5_f0.1_iid_a0.1_npub1000_vvi")
-    parser.add_argument("--algorithm", type=str, default="feded")
-    parser.add_argument("--n_rounds", type=int, default=1)
+    parser.add_argument("--settings_file", type=str, default="mnist_c10_f1.0_iid_a0.1_npub1000_bze")
+    parser.add_argument("--algorithm", type=str, default="fedavg")
+    parser.add_argument("--n_rounds", type=int, default=5)
     parser.add_argument("--local_epochs", type=int, default=1)
     parser.add_argument("--mu", type=float, default=0.0)
     parser.add_argument("--train_batch_size", type=int, default=64)
