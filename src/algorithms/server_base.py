@@ -33,6 +33,7 @@ class ServerBase(ABC):
         self.momentum = args.momentum
         self.local_epochs = args.local_epochs
         self.loss_function = nn.CrossEntropyLoss()
+        #self.label_count_matrix = 
         self.n_samples_client = [len(data_loader.dataset) for data_loader in train_loaders]
         #self.n_samples_total = sum(self.n_samples_client)
         self.n_samples_public = args.n_samples_public
