@@ -1,6 +1,6 @@
-settings_file mnist_c10_f1.0_iid_a0.1_npub1000_bze
+settings_file mnist_c5_f0.1_iid_a0.1_npub1000_vvi
 algorithm fedavg
-n_rounds 5
+n_rounds 10
 local_epochs 1
 mu 0.0
 train_batch_size 64
@@ -13,9 +13,9 @@ public_batch_size 64
 student_batch_size 32
 student_epochs 200
 dataset mnist
-n_clients 10
-train_fraction 1.0
+n_clients 5
+train_fraction 0.1
 distribution iid
 alpha 0.1
 n_samples_public 1000
-settings_id bze
+settings_id vvi
