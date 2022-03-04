@@ -1,6 +1,6 @@
-settings_file mnist_c10_f1.0_niid_a0.1_npub1000_yjc
-algorithm feded
-n_rounds 1
+settings_file mnist_c10_f1.0_iid_a0.1_npub7000_tnx
+algorithm fedavg
+n_rounds 30
 local_epochs 1
 mu 0.0
 train_batch_size 64
@@ -15,7 +15,7 @@ student_epochs 200
 dataset mnist
 n_clients 10
 train_fraction 1.0
-distribution niid
+distribution iid
 alpha 0.1
-n_samples_public 1000
-settings_id yjc
+n_samples_public 7000
+settings_id tnx
