@@ -100,10 +100,10 @@ if __name__ == "__main__":
     parser.add_argument("--evaluate_train", type=bool, default=True, help="Do evaluation of local training")
 
     # Ensemble parameters
-    parser.add_argument("--local_epochs_ensemble", type=int, default=5)
+    parser.add_argument("--local_epochs_ensemble", type=int, default=10)
     parser.add_argument("--public_batch_size", type=int, default=64)
     parser.add_argument("--student_batch_size", type=int, default=32)
-    parser.add_argument("--student_epochs", type=int, default=50)
+    parser.add_argument("--student_epochs", type=int, default=200)
 
     args = parser.parse_args()
 
