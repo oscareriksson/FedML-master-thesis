@@ -37,7 +37,7 @@ class PytorchDataset:
             transform=transform, 
             download=True)
         if train_fraction is None:
-            return train_data
+            return Subset(train_data, [])
         else:
             n_samples = len(train_data.targets)
             index_limit = int(train_fraction * n_samples)
