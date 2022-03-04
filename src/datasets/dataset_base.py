@@ -54,7 +54,7 @@ class PytorchDataset:
             distribution    (str): Indicator to sample iid or non-iid.
             alpha           (float): Concentration parameter for Dirichlet distribution.
         """
-        labels = np.array([target for target in self.train_data.dataset.targets])
+        labels = np.array([self.train_data[i][1] for i in range(len(self.train_data))])
         n_classes = len(np.unique(labels))
         partition_matrix = np.ones((n_classes, n_clients))
 
@@ -76,7 +76,7 @@ class PytorchDataset:
                             break
                         else:
                             sample_idx = np.random.choice(len(class_indices))
-                            local_sets_indices[j] = np.append(local_sets_indices[j], class_indices[sample_idx])
+                            local_sets_indices[j] = np.append(local_sets_indices[j], self.train_data.indices[class_indices[sample_idx]])
                             class_indices = np.delete(class_indices, sample_idx)
 
         # non-iid: Sample from dirichlet distribution.
@@ -95,7 +95,7 @@ class PytorchDataset:
                 for client in range(n_clients):
                     np.random.shuffle(class_indices[each_class])
                     local_size = int(partition_matrix[each_class, client] * sample_size)
-                    local_sets_indices[client] += list(class_indices[each_class][:local_size])
+                    local_sets_indices[client] += list(self.train_data.indices[class_indices[each_class][:local_size]])
                     class_indices[each_class] = class_indices[each_class][local_size:]
 
         self.local_sets_indices = local_sets_indices
@@ -146,7 +146,7 @@ class PytorchDataset:
         client_data_loaders = []
         for client_indices in self.local_sets_indices:
                 np.random.shuffle(client_indices)
-                client_data_loaders.append(DataLoader(Subset(self.train_data, client_indices), batch_size))
+                client_data_loaders.append(DataLoader(Subset(self.train_data.dataset, client_indices), batch_size))
         return client_data_loaders
     
     def get_test_data_loader(self, batch_size):
