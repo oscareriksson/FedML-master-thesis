@@ -80,6 +80,7 @@ class Mnist_Student(nn.Module):
         x = self.fc1(x)
         return x
 
+
 class Cifar_Student(nn.Module):
     def __init__(self, n_classes):
         super(Cifar_Student, self).__init__()
