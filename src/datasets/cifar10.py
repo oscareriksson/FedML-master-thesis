@@ -1,11 +1,12 @@
 from .dataset_base import PytorchDataset
 from torchvision.transforms import Compose, ToTensor, Normalize
+from torch.utils.data import Subset
 
 
 class Cifar10(PytorchDataset):
     """ Cifar10 dataset class.
     """
-    def __init__(self, train_fraction):
+    def __init__(self, num_workers, train_fraction=None):
         super().__init__("CIFAR10")
         """ Constructor method.
 
@@ -19,6 +20,9 @@ class Cifar10(PytorchDataset):
             train=False, 
             transform=transform, 
             download=True)
+
+        self.public_data = Subset(self.test_data, [])
+        self.num_workers = num_workers
 
         self.train_data = self._sample_train_data(train_fraction, transform)
         self.n_samples = len(self.train_data)

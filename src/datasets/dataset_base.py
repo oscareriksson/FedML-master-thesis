@@ -18,6 +18,7 @@ class PytorchDataset:
         self.train_data = None
         self.test_data = None
         self.public_data = None
+        self.num_workers = 0
 
 
     def _sample_train_data(self, train_fraction, transform):
@@ -103,7 +104,7 @@ class PytorchDataset:
         """
         """
 
-        idx_split = int(len(self.test_data) / 2)
+        idx_split = int(len(self.test_data) * 7 / 10)
         self.public_data = Subset(self.test_data, np.arange(idx_split))
         self.test_data = Subset(self.test_data, np.arange(idx_split, idx_split*2))
 
@@ -122,7 +123,7 @@ class PytorchDataset:
         client_data_loaders = []
         for client_indices in self.local_sets_indices:
                 np.random.shuffle(client_indices)
-                client_data_loaders.append(DataLoader(Subset(self.train_data.dataset, client_indices), batch_size))
+                client_data_loaders.append(DataLoader(Subset(self.train_data.dataset, client_indices), batch_size, num_workers=self.num_workers))
         return client_data_loaders
     
     def get_test_data_loader(self, batch_size):
@@ -131,7 +132,7 @@ class PytorchDataset:
             Parameters:
             batch_size      (int): Batch size for loading test data.
         """
-        return DataLoader(self.test_data, batch_size)
+        return DataLoader(self.test_data, batch_size, num_workers=self.num_workers)
 
     def get_public_data_loader(self, batch_size):
         """ Get test data loader.
@@ -139,7 +140,7 @@ class PytorchDataset:
             Parameters:
             batch_size      (int): Batch size for loading test data.
         """
-        return DataLoader(self.public_data, batch_size)
+        return DataLoader(self.public_data, batch_size, num_workers=self.num_workers)
     
     def get_local_sets_indices(self):
         """

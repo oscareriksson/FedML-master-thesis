@@ -26,7 +26,7 @@ def load_data_loaders(args, local_indices, test_indices, public_indices):
     module = importlib.import_module(f"src.datasets.{args.dataset}")
     data_class_ = getattr(module, args.dataset.title())
 
-    dataset = data_class_()
+    dataset = data_class_(args.num_workers)
 
     dataset.set_local_sets_indices(local_indices)
     dataset.set_test_indices(test_indices)
@@ -89,15 +89,16 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--settings_file", type=str, default="mnist_c10_f1.0_niid_a0.1_qki")
-    parser.add_argument("--algorithm", type=str, default="feded")
-    parser.add_argument("--n_rounds", type=int, default=1)
+    parser.add_argument("--settings_file", type=str, default="cifar10_c5_f0.1_iid_a0.1_czb")
+    parser.add_argument("--algorithm", type=str, default="fedavg")
+    parser.add_argument("--n_rounds", type=int, default=10)
     parser.add_argument("--local_epochs", type=int, default=1)
     parser.add_argument("--mu", type=float, default=0.0)
     parser.add_argument("--train_batch_size", type=int, default=64)
     parser.add_argument("--test_batch_size", type=int, default=64)
     parser.add_argument("--learning_rate", type=float, default=0.001, help="Local learning rate")
     parser.add_argument("--momentum", type=float, default=0.9, help="Local momentum")
+    parser.add_argument("--num_workers", type=int, default=4)
 
     # Ensemble parameters
     parser.add_argument("--local_epochs_ensemble", type=int, default=30)
