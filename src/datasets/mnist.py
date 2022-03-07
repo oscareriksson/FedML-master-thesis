@@ -20,8 +20,7 @@ class Mnist(PytorchDataset):
             transform=transform, 
             download=True)
 
-        self.public_train_data = Subset(self.test_data, [])
-        self.public_val_data = Subset(self.test_data, [])
+        self.public_data = Subset(self.test_data, [])
 
         self.train_data = self._sample_train_data(train_fraction, transform)
         self.n_samples = len(self.train_data)

@@ -21,7 +21,7 @@ def save_run_settings(args, run_folder):
             f.write("\n")
 
 
-def load_data_loaders(args, local_indices, test_indices, public_train_indices, public_val_indices):
+def load_data_loaders(args, local_indices, test_indices, public_indices):
     assert args.dataset in ["mnist", "cifar10", "cifar100"], f"Chosen dataset is not available."
     module = importlib.import_module(f"src.datasets.{args.dataset}")
     data_class_ = getattr(module, args.dataset.title())
@@ -30,16 +30,16 @@ def load_data_loaders(args, local_indices, test_indices, public_train_indices, p
 
     dataset.set_local_sets_indices(local_indices)
     dataset.set_test_indices(test_indices)
-    dataset.set_public_indices(public_train_indices, public_val_indices)
+    dataset.set_public_indices(public_indices)
 
     client_data_loaders = dataset.get_train_data_loaders(args.train_batch_size)
     test_data_loader = dataset.get_test_data_loader(args.test_batch_size)
-    public_train_loader, public_val_loader = dataset.get_public_data_loaders(args.public_batch_size)
+    public_data_loader = dataset.get_public_data_loader(args.public_batch_size)
 
-    return client_data_loaders, test_data_loader, public_train_loader, public_val_loader
+    return client_data_loaders, test_data_loader, public_data_loader
 
 
-def create_server(args, model, client_loaders, test_loader, public_train_loader, public_val_loader, run_folder):
+def create_server(args, model, client_loaders, test_loader, public_loader, run_folder):
     if args.algorithm == "fedavg":
         from src.algorithms.fedavg import FedAvgServer
         server = FedAvgServer(args, model, run_folder, client_loaders, test_loader)
@@ -50,7 +50,7 @@ def create_server(args, model, client_loaders, test_loader, public_train_loader,
 
     elif args.algorithm == "feded":
         from src.algorithms.feded import FedEdServer
-        server = FedEdServer(args, model, run_folder, client_loaders, test_loader, public_train_loader, public_val_loader)
+        server = FedEdServer(args, model, run_folder, client_loaders, test_loader, public_loader)
         
     else:
         print("Chosen algorithm is not supported.")
@@ -69,19 +69,18 @@ def main(args):
     local_indices = []
     with open(f'{settings_path}/data_splits.npy', 'rb') as f:
         test_indices = np.load(f)
-        public_train_indices = np.load(f)
-        public_val_indices = np.load(f)
+        public_indices = np.load(f)
+
         try:
             while True:
                 local_indices.append(np.load(f))
         except:
             print("")
 
+    client_data_loaders, test_data_loader, public_data_loader = \
+        load_data_loaders(args, local_indices, test_indices, public_indices)
 
-    client_data_loaders, test_data_loader, public_train_loader, public_val_loader = \
-        load_data_loaders(args, local_indices, test_indices, public_train_indices, public_val_indices)
-
-    server = create_server(args, model, client_data_loaders, test_data_loader, public_train_loader, public_val_loader, run_folder)
+    server = create_server(args, model, client_data_loaders, test_data_loader, public_data_loader, run_folder)
     server.run()
 
     print(f"Results saved in: {run_folder}")
@@ -90,10 +89,10 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--settings_file", type=str, default="mnist_c10_f1.0_iid_a0.1_npub1000_bze")
-    parser.add_argument("--algorithm", type=str, default="fedavg")
-    parser.add_argument("--n_rounds", type=int, default=5)
-    parser.add_argument("--local_epochs", type=int, default=1)
+    parser.add_argument("--settings_file", type=str, default="mnist_c5_f0.1_iid_a0.1_qgn")
+    parser.add_argument("--algorithm", type=str, default="feded")
+    parser.add_argument("--n_rounds", type=int, default=1)
+    parser.add_argument("--local_epochs", type=int, default=3)
     parser.add_argument("--mu", type=float, default=0.0)
     parser.add_argument("--train_batch_size", type=int, default=64)
     parser.add_argument("--test_batch_size", type=int, default=64)
@@ -102,10 +101,11 @@ if __name__ == "__main__":
     parser.add_argument("--evaluate_train", type=bool, default=True, help="Do evaluation of local training")
 
     # Ensemble parameters
-    parser.add_argument("--local_epochs_ensemble", type=int, default=10)
+    parser.add_argument("--local_epochs_ensemble", type=int, default=5)
     parser.add_argument("--public_batch_size", type=int, default=64)
-    parser.add_argument("--student_batch_size", type=int, default=32)
-    parser.add_argument("--student_epochs", type=int, default=200)
+    parser.add_argument("--student_batch_size", type=int, default=64)
+    parser.add_argument("--student_epochs", type=int, default=15)
+    parser.add_argument("--public_data_sizes", type=str, default="1000 3000 5000")
 
     args = parser.parse_args()
 
@@ -116,8 +116,7 @@ if __name__ == "__main__":
     dargs['train_fraction'] = float(init_data[2][1:])
     dargs['distribution'] = init_data[3]
     dargs['alpha'] = float(init_data[4][1:])
-    dargs['n_samples_public'] = int(init_data[5][4:])
-    dargs['settings_id'] = init_data[6]
+    dargs['settings_id'] = init_data[5]
 
     print("=" * 80)
     print("Summary of training process:")
