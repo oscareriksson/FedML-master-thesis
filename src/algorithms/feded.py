@@ -6,7 +6,6 @@ import torch.nn.functional as F
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from torch.utils.data.sampler import SubsetRandomSampler
 from tqdm import tqdm
 from ..models.models import create_model
 from ..datasets.dataset_student import StudentData
@@ -142,9 +141,9 @@ class FedEdServer(ServerBase):
 
         student_dataset = StudentData(public_train_data, student_targets)
 
-        student_train_loader = DataLoader(student_dataset, batch_size=self.student_batch_size)
-        public_train_loader = DataLoader(public_train_data, batch_size=self.public_batch_size)
-        public_val_loader = DataLoader(public_val_data, batch_size=self.public_batch_size)
+        student_train_loader = DataLoader(student_dataset, batch_size=self.student_batch_size, num_workers=self.num_workers)
+        public_train_loader = DataLoader(public_train_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
+        public_val_loader = DataLoader(public_val_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
 
         return student_train_loader, public_train_loader, public_val_loader
 

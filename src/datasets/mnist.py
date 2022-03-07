@@ -5,7 +5,7 @@ from torch.utils.data import Subset
 class Mnist(PytorchDataset):
     """ Mnist dataset class.
     """
-    def __init__(self, train_fraction=None):
+    def __init__(self, num_workers, train_fraction=None):
         super().__init__("MNIST")
         """ Constructor method.
 
@@ -21,6 +21,7 @@ class Mnist(PytorchDataset):
             download=True)
 
         self.public_data = Subset(self.test_data, [])
+        self.num_workers = num_workers
 
         self.train_data = self._sample_train_data(train_fraction, transform)
         self.n_samples = len(self.train_data)

@@ -29,6 +29,7 @@ class ServerBase(ABC):
         self.n_rounds = args.n_rounds
         self.lr_rate = args.learning_rate
         self.momentum = args.momentum
+        self.num_workers = args.num_workers
         self.local_epochs = args.local_epochs
         self.loss_function = nn.CrossEntropyLoss()
         #self.label_count_matrix = 
