@@ -21,7 +21,7 @@ def initialize_data(args):
     module = importlib.import_module(f"src.datasets.{args.dataset}")
     data_class_ = getattr(module, args.dataset.title())
 
-    dataset = data_class_(args.train_fraction)
+    dataset = data_class_(num_workers=0, train_fraction=args.train_fraction)
     dataset.generate_client_data(args.n_clients, args.distribution, args.alpha)
     local_indices = dataset.get_local_sets_indices()
 
@@ -53,11 +53,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", type=str, default="cifar10")
-    parser.add_argument("--model_name", type=str, default="cifar10_cnn")
-    parser.add_argument("--n_clients", type=int, default=5, help="Number of clients per round")
-    parser.add_argument("--train_fraction", type=float, default=0.1)
-    parser.add_argument("--distribution", type=str, default="iid")
+    parser.add_argument("--dataset", type=str, default="mnist")
+    parser.add_argument("--model_name", type=str, default="mnist_cnn")
+    parser.add_argument("--n_clients", type=int, default=10, help="Number of clients per round")
+    parser.add_argument("--train_fraction", type=float, default=1.0)
+    parser.add_argument("--distribution", type=str, default="niid")
     parser.add_argument("--alpha", type=float, default=0.1)
 
     args = parser.parse_args()

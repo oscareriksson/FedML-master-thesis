@@ -106,7 +106,7 @@ class PytorchDataset:
 
         idx_split = int(len(self.test_data) * 7 / 10)
         self.public_data = Subset(self.test_data, np.arange(idx_split))
-        self.test_data = Subset(self.test_data, np.arange(idx_split, idx_split*2))
+        self.test_data = Subset(self.test_data, np.arange(idx_split, len(self.test_data)))
 
 
     def get_train_data_loaders(self, batch_size):

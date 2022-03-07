@@ -91,14 +91,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--settings_file", type=str, default="cifar10_c5_f0.1_iid_a0.1_czb")
     parser.add_argument("--algorithm", type=str, default="fedavg")
-    parser.add_argument("--n_rounds", type=int, default=10)
-    parser.add_argument("--local_epochs", type=int, default=1)
+    parser.add_argument("--n_rounds", type=int, default=20)
+    parser.add_argument("--local_epochs", type=int, default=3)
     parser.add_argument("--mu", type=float, default=0.0)
     parser.add_argument("--train_batch_size", type=int, default=64)
     parser.add_argument("--test_batch_size", type=int, default=64)
     parser.add_argument("--learning_rate", type=float, default=0.001, help="Local learning rate")
     parser.add_argument("--momentum", type=float, default=0.9, help="Local momentum")
-    parser.add_argument("--num_workers", type=int, default=4)
+    parser.add_argument("--num_workers", type=int, default=2)
 
     # Ensemble parameters
     parser.add_argument("--local_epochs_ensemble", type=int, default=30)

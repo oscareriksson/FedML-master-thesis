@@ -49,11 +49,11 @@ class Mnist_Cnn(nn.Module):
 class Cifar_Cnn(nn.Module):
     def __init__(self, n_classes):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 16, 5, 1, 2)
+        self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool1 = nn.MaxPool2d(2)
-        self.conv2 = nn.Conv2d(16, 32, 5, 1, 2)
+        self.conv2 = nn.Conv2d(6, 16)
         self.pool2 = nn.MaxPool2d(2)
-        self.fc1 = nn.Linear(32 * 8 * 8, 128)
+        self.fc1 = nn.Linear(16 * 5 * 5, 128)
         self.fc2 = nn.Linear(128, 64)
         self.fc3 = nn.Linear(64, n_classes)
 
