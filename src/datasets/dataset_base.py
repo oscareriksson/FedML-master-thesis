@@ -17,8 +17,7 @@ class PytorchDataset:
         self.client_data_indices = []
         self.train_data = None
         self.test_data = None
-        self.public_train_data = None
-        self.public_val_data = None
+        self.public_data = None
 
 
     def _sample_train_data(self, train_fraction, transform):
@@ -100,36 +99,13 @@ class PytorchDataset:
 
         self.local_sets_indices = local_sets_indices
 
-    def split_test_public(self, n_samples, val_fraction):
-        labels = np.array([y for (_, y) in self.test_data])
-        n_classes = len(np.unique(labels))
-        n_samples_per_class = int(n_samples / n_classes)
-        all_indices = np.arange(len(labels))
+    def split_test_public(self):
+        """
+        """
 
-        public_set_indices = []
-
-        for i in range(n_classes):
-            class_indices = np.where(labels == i)[0]
-            chosen_indices = list(np.random.choice(class_indices, n_samples_per_class, replace=False))
-            public_set_indices.extend(chosen_indices)
-
-        # Fill up to n_samples.
-        samples_left = n_samples - len(public_set_indices)
-        indices_left = [x for x in all_indices if x not in public_set_indices]
-        chosen_indices = list(np.random.choice(indices_left, samples_left, replace=False))
-        public_set_indices.extend(chosen_indices)
-
-        # Split into train and validation.
-        idx_limit = int(val_fraction * n_samples)
-        random.shuffle(public_set_indices)
-        public_train_indices = public_set_indices[idx_limit:]
-        public_val_indices = public_set_indices[:idx_limit]
-
-        test_set_indices = [x for x in all_indices if x not in public_set_indices]
-
-        self.public_train_data = Subset(self.test_data, public_train_indices)
-        self.public_val_data = Subset(self.test_data, public_val_indices)
-        self.test_data = Subset(self.test_data, test_set_indices)
+        idx_split = int(len(self.test_data) / 2)
+        self.public_data = Subset(self.test_data, np.arange(idx_split))
+        self.test_data = Subset(self.test_data, np.arange(idx_split, idx_split*2))
 
 
     def get_train_data_loaders(self, batch_size):
@@ -157,13 +133,13 @@ class PytorchDataset:
         """
         return DataLoader(self.test_data, batch_size)
 
-    def get_public_data_loaders(self, batch_size):
+    def get_public_data_loader(self, batch_size):
         """ Get test data loader.
 
             Parameters:
             batch_size      (int): Batch size for loading test data.
         """
-        return DataLoader(self.public_train_data, batch_size), DataLoader(self.public_val_data, batch_size)
+        return DataLoader(self.public_data, batch_size)
     
     def get_local_sets_indices(self):
         """
@@ -178,7 +154,7 @@ class PytorchDataset:
     def get_public_indices(self):
         """
         """
-        return self.public_train_data.indices, self.public_val_data.indices
+        return self.public_data.indices
 
     def set_local_sets_indices(self, local_sets_indices):
         """
@@ -190,9 +166,7 @@ class PytorchDataset:
         """
         self.test_data.indices = test_indices
 
-    def set_public_indices(self, train_indices, val_indices):
+    def set_public_indices(self, public_indices):
         """
         """
-        self.public_train_data.indices = train_indices
-        self.public_val_data.indices = val_indices
-    
+        self.public_data.indices = public_indices
