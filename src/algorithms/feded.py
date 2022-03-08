@@ -98,7 +98,7 @@ class FedEdServer(ServerBase):
         model = create_model(self.dataset_name, student=True)
         model.to(self.device)
         loss_function = nn.MSELoss()
-        optimizer = optim.Adam(model.parameters(), lr=0.001)
+        optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
         model.train()
         for epoch in range(self.student_epochs):
