@@ -1,3 +1,5 @@
+from pydoc import cli
+import sys
 from zmq import device
 from .server_base import ServerBase
 import copy
@@ -25,6 +27,7 @@ class FedEdServer(ServerBase):
         self.student_epochs = args.student_epochs
         self.public_data_sizes = [int(x) for x in args.public_data_sizes.split(' ')]
         self.n_samples_train_public = len(public_loader.dataset.indices)
+        self.weight_scheme = args.weight_scheme
 
     def run(self):
         """ Execute federated training and distillation.
@@ -44,8 +47,9 @@ class FedEdServer(ServerBase):
 
             logits_ensemble = self._increment_logits_ensemble(logits_ensemble, logits_local, j)
 
-        # If weighted, normalize
-        logits_ensemble = torch.true_divide(logits_ensemble.T, torch.sum(logits_ensemble, axis=1)).T
+        # Normalize scheme w2
+        if self.weight_scheme == "w2":
+            logits_ensemble = torch.true_divide(logits_ensemble.T, torch.sum(logits_ensemble, axis=1)).T
 
         self._save_results(local_accs, "client_accuracy")
         self._save_results(local_losses, "client_loss")
@@ -149,15 +153,21 @@ class FedEdServer(ServerBase):
 
         return student_train_loader, public_train_loader, public_val_loader
 
-    
     def _get_scaling_factor(self, client_nr):
         """ Weight client contributions.
 
             Parameters:
             client_nr   (int): ID for client.
         """
-        #return self.n_samples_client[client_nr] / sum(self.n_samples_client)
-        return self.label_count_matrix[client_nr]
+        if self.weight_scheme == "w0":
+            return self.n_samples_client[client_nr] / sum(self.n_samples_client)
+        elif self.weight_scheme == "w1":
+            return torch.true_divide(self.label_count_matrix[client_nr], torch.sum(self.label_count_matrix, axis=0))
+        elif self.weight_scheme == "w2":
+            return self.label_count_matrix[client_nr]
+        else:
+            print("Chosen weight scheme is not implemented.")
+            sys.exit(0)
 
     def _get_local_logits(self):
         """

@@ -9,7 +9,7 @@ import string
 import random
 
 def prepare_run_folder(args):
-    run_folder = f"./results/run_w2_{args.algorithm}_{args.settings_id}"
+    run_folder = f"./results/run_{args.weight_scheme}_{args.algorithm}_{args.settings_id}"
     if not os.path.exists(run_folder):
         os.makedirs(run_folder)
     return run_folder
@@ -106,6 +106,8 @@ if __name__ == "__main__":
     parser.add_argument("--student_batch_size", type=int, default=64)
     parser.add_argument("--student_epochs", type=int, default=150)
     parser.add_argument("--public_data_sizes", type=str, default="1000 3000 5000 7000")
+    parser.add_argument("--weight_scheme", type=str, default="w0")
+
 
     args = parser.parse_args()
 
