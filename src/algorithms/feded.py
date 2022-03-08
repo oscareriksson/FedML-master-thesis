@@ -45,7 +45,7 @@ class FedEdServer(ServerBase):
             logits_ensemble = self._increment_logits_ensemble(logits_ensemble, logits_local, j)
 
         # If weighted, normalize
-        logits_ensemble = torch.true_divide(logits_ensemble.T, torch.sum(logits_ensemble, axis=1)).T
+        # logits_ensemble = torch.true_divide(logits_ensemble.T, torch.sum(logits_ensemble, axis=1)).T
 
         self._save_results(local_accs, "client_accuracy")
         self._save_results(local_losses, "client_loss")
