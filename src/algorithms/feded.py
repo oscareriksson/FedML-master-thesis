@@ -149,12 +149,13 @@ class FedEdServer(ServerBase):
 
     
     def _get_scaling_factor(self, client_nr):
-        """ Get scaling factor for FedAVG algorithm.
+        """ Weight client contributions.
 
             Parameters:
             client_nr   (int): ID for client.
         """
-        return self.n_samples_client[client_nr] / sum(self.n_samples_client)
+        #return self.n_samples_client[client_nr] / sum(self.n_samples_client)
+        return self.label_count_matrix[client_nr] / np.sum(self.label_count_matrix, axis=0)
 
     def _get_local_logits(self):
         """

@@ -9,7 +9,7 @@ import string
 import random
 
 def prepare_run_folder(args):
-    run_folder = f"./results/run_{args.algorithm}_{args.settings_id}"
+    run_folder = f"./results/run_w1_{args.algorithm}_{args.settings_id}"
     if not os.path.exists(run_folder):
         os.makedirs(run_folder)
     return run_folder
