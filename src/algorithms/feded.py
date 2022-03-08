@@ -44,6 +44,9 @@ class FedEdServer(ServerBase):
 
             logits_ensemble = self._increment_logits_ensemble(logits_ensemble, logits_local, j)
 
+        # If weighted, normalize
+        logits_ensemble = F.softmax(logits_ensemble, dim=1)
+
         self._save_results(local_accs, "client_accuracy")
         self._save_results(local_losses, "client_loss")
 
