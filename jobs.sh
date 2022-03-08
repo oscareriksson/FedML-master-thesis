@@ -23,3 +23,10 @@ python3 main.py --settings_file mnist_c10_f1.0_niid_a0.1_yjr --algorithm feded -
 # python3 main.py --settings_file mnist_c10_f1.0_niid_a0.1_mhg --algorithm fedavg --local_epochs 1 --n_rounds 50
 # python3 main.py --settings_file mnist_c10_f1.0_niid_a0.1_yhm --algorithm fedavg --local_epochs 1 --n_rounds 50
 # python3 main.py --settings_file mnist_c10_f1.0_niid_a0.1_yjr --algorithm fedavg --local_epochs 1 --n_rounds 50
+
+git config --global user.email "oscareriksson1@hotmail.com"
+git config --global user.name "Oscar Eriksson"
+
+git add -f results/
+git commit -m "Test results, weighted"
+git push
