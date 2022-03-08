@@ -45,7 +45,7 @@ class FedEdServer(ServerBase):
             logits_ensemble = self._increment_logits_ensemble(logits_ensemble, logits_local, j)
 
         # If weighted, normalize
-        # logits_ensemble = torch.true_divide(logits_ensemble.T, torch.sum(logits_ensemble, axis=1)).T
+        logits_ensemble = torch.true_divide(logits_ensemble.T, torch.sum(logits_ensemble, axis=1)).T
 
         self._save_results(local_accs, "client_accuracy")
         self._save_results(local_losses, "client_loss")
@@ -86,7 +86,7 @@ class FedEdServer(ServerBase):
             train_accs.append(train_acc)
             train_losses.append(train_loss)
             print("Epoch {}/{} Train accuracy: {:.0f}%  Train loss: {:.4f}".format(
-                i+1, self.student_epochs, train_acc, train_loss), end="\r", flush=True)
+                i+1, self.local_epochs_ensemble, train_acc, train_loss), end="\r", flush=True)
 
         print("Training completed")
         print("Train accuracy: {:.0f}%  Train loss: {:.4f}\n".format(train_acc, train_loss), flush=True)
@@ -98,7 +98,7 @@ class FedEdServer(ServerBase):
         model = create_model(self.dataset_name, student=True)
         model.to(self.device)
         loss_function = nn.MSELoss()
-        optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+        optimizer = optim.Adam(model.parameters(), lr=0.001)
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
         model.train()
         for epoch in range(self.student_epochs):
@@ -157,7 +157,7 @@ class FedEdServer(ServerBase):
             client_nr   (int): ID for client.
         """
         #return self.n_samples_client[client_nr] / sum(self.n_samples_client)
-        return torch.true_divide(self.label_count_matrix[client_nr], torch.sum(self.label_count_matrix, axis=0))
+        return self.label_count_matrix[client_nr]
 
     def _get_local_logits(self):
         """
