@@ -34,7 +34,7 @@ class ServerBase(ABC):
         self.local_epochs = args.local_epochs
         self.loss_function = nn.CrossEntropyLoss()
         self.local_sets_indices = [self.train_loaders[i].dataset.indices for i in range(self.n_clients)]
-        #self.label_count_matrix = torch.tensor([[torch.sum(self.train_loaders[0].dataset.dataset.targets[self.local_sets_indices[i]] == c) for c in range(self.n_classes)] for i in range(self.n_clients)], device=self.device)
+        self.label_count_matrix = torch.tensor([[torch.sum(self.train_loaders[0].dataset.dataset.targets[self.local_sets_indices[i]] == c) for c in range(self.n_classes)] for i in range(self.n_clients)], device=self.device)
         self.n_samples_client = [len(data_loader.dataset) for data_loader in train_loaders]
         self.round_nr = 0
         self.run_folder = run_folder
