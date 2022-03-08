@@ -155,7 +155,7 @@ class FedEdServer(ServerBase):
             client_nr   (int): ID for client.
         """
         #return self.n_samples_client[client_nr] / sum(self.n_samples_client)
-        return self.label_count_matrix[client_nr] / np.sum(self.label_count_matrix, axis=0)
+        return self.label_count_matrix[client_nr] / torch.sum(self.label_count_matrix, axis=0)
 
     def _get_local_logits(self):
         """
