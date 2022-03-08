@@ -1,3 +1,4 @@
+from types import new_class
 from ..models.models import create_model
 from abc import ABC, abstractmethod
 import torch
@@ -32,7 +33,8 @@ class ServerBase(ABC):
         self.num_workers = args.num_workers
         self.local_epochs = args.local_epochs
         self.loss_function = nn.CrossEntropyLoss()
-        #self.label_count_matrix = 
+        self.local_sets_indices = [self.train_loaders[i].dataset.indices for i in range(self.n_clients)]
+        self.label_count_matrix = np.array([[torch.sum(self.train_loaders[0].dataset.dataset.targets[self.local_sets_indices[i]] == c) for c in range(self.n_classes)] for i in range(self.n_clients)])
         self.n_samples_client = [len(data_loader.dataset) for data_loader in train_loaders]
         #self.n_samples_total = sum(self.n_samples_client)
         self.round_nr = 0
