@@ -43,10 +43,10 @@ class Mnist_Cnn(nn.Module):
 
 class Cifar_Cnn(nn.Module):
     def __init__(self, n_classes):
-        super().__init__()
+        super(Cifar_Cnn).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool1 = nn.MaxPool2d(2)
-        self.conv2 = nn.Conv2d(6, 16)
+        self.conv2 = nn.Conv2d(6, 16, 5)
         self.pool2 = nn.MaxPool2d(2)
         self.fc1 = nn.Linear(16 * 5 * 5, 128)
         self.fc2 = nn.Linear(128, 64)
@@ -79,12 +79,15 @@ class Mnist_Student(nn.Module):
 class Cifar_Student(nn.Module):
     def __init__(self, n_classes):
         super(Cifar_Student, self).__init__()
-        self.conv1 = nn.Conv2d(3, 8, 5, 1, 2)
-        self.pool = nn.MaxPool2d(4)
-        self.fc1 = nn.Linear(8 * 8 * 8, n_classes)
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool1 = nn.MaxPool2d(2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.pool2 = nn.MaxPool2d(2)
+        self.fc1 = nn.Linear(16 * 5 * 5, n_classes)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool1(F.relu(self.conv1(x)))
+        x = self.pool2(F.relu(self.conv2(x)))
         x = torch.flatten(x, 1)
         x = self.fc1(x)
         return x
