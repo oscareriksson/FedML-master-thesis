@@ -75,10 +75,7 @@ class FedEdServer(ServerBase):
         optimizer = optim.SGD(self.local_model.parameters(), lr=self.lr_rate, momentum=self.momentum)
         train_accs, train_losses = [], []
         for i in range(self.local_epochs_ensemble):
-            for x, y in tqdm(
-                self.train_loaders[client_nr],
-                leave=False,
-                desc=f"Epoch {i+1}/{self.local_epochs_ensemble}"):
+            for x, y in self.train_loaders[client_nr]:
                 x, y = x.to(self.device), y.to(self.device)
                 optimizer.zero_grad()
                 output = self.local_model(x)
@@ -88,6 +85,8 @@ class FedEdServer(ServerBase):
             train_acc, train_loss = self.evaluate(self.local_model, self.train_loaders[client_nr])
             train_accs.append(train_acc)
             train_losses.append(train_loss)
+            print("Epoch {}/{} Train accuracy: {:.0f}%  Train loss: {:.4f}".format(
+                i+1, self.student_epochs, train_acc, train_loss), end="\r", flush=True)
 
         print("Training completed")
         print("Train accuracy: {:.0f}%  Train loss: {:.4f}\n".format(train_acc, train_loss), flush=True)
