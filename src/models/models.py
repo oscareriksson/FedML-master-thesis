@@ -83,7 +83,7 @@ class Cifar_Student(nn.Module):
         self.pool1 = nn.MaxPool2d(2)
         self.conv2 = nn.Conv2d(16, 32, 5)
         self.pool2 = nn.MaxPool2d(2)
-        self.fc1 = nn.Linear(16 * 5 * 5, n_classes)
+        self.fc1 = nn.Linear(32 * 5 * 5, n_classes)
 
     def forward(self, x):
         x = self.pool1(F.relu(self.conv1(x)))
