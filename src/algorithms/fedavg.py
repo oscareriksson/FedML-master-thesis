@@ -22,7 +22,6 @@ class FedAvgServer(ServerBase):
         local_accs, local_losses = [[] for _ in range(self.n_clients)], [[] for _ in range(self.n_clients)]
         test_accs, test_losses = [], []
         for i in range(self.n_rounds):
-            print("== Round {} ==".format(i+1), flush=True)
             self.set_round(i) # This simplifies FedProx inheritance.
 
             avg_weights = OrderedDict()
@@ -30,7 +29,7 @@ class FedAvgServer(ServerBase):
                 avg_weights[param_name] = torch.zeros(self.global_model.state_dict()[param_name].shape).to(self.device)
             
             for j in range(self.n_clients):
-                print("-- Training client nr {} --".format(j+1))
+                print("Round {} : Training client nr {} ".format(i+1, j+1), end="\r")
                 acc, loss = self._local_training(j)
                 local_accs[j].append(acc)
                 local_losses[j].append(loss)
@@ -71,7 +70,7 @@ class FedAvgServer(ServerBase):
                 error = self.loss_function(output, y)
                 error.backward()
                 optimizer.step()
-        print("Training completed")
+
         train_acc, train_loss = self.evaluate(self.local_model, self.train_loaders[client_nr])
         return train_acc, train_loss
     
