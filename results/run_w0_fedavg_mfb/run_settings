@@ -1,7 +1,7 @@
-settings_file mnist_c10_f1.0_niid_a0.1_mhg
-algorithm feded
-n_rounds 1
-local_epochs 3
+settings_file cifar10_c10_f1.0_iid_a0.1_mfb
+algorithm fedavg
+n_rounds 150
+local_epochs 1
 mu 0.0
 train_batch_size 64
 test_batch_size 64
@@ -13,10 +13,10 @@ public_batch_size 64
 student_batch_size 64
 student_epochs 150
 public_data_sizes 1000 3000 5000 7000
-weight_scheme w1
-dataset mnist
+weight_scheme w0
+dataset cifar10
 n_clients 10
 train_fraction 1.0
-distribution niid
+distribution iid
 alpha 0.1
-settings_id mhg
+settings_id mfb

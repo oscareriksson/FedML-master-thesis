@@ -1,6 +1,6 @@
 settings_file cifar10_c10_f1.0_iid_a0.1_ygi
 algorithm fedavg
-n_rounds 100
+n_rounds 150
 local_epochs 1
 mu 0.0
 train_batch_size 64
