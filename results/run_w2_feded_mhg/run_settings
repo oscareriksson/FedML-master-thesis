@@ -13,6 +13,7 @@ public_batch_size 64
 student_batch_size 64
 student_epochs 150
 public_data_sizes 1000 3000 5000 7000
+weight_scheme w2
 dataset mnist
 n_clients 10
 train_fraction 1.0
