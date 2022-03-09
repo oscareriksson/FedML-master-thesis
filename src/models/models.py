@@ -83,7 +83,9 @@ class Cifar_Student(nn.Module):
         self.pool1 = nn.MaxPool2d(2)
         self.conv2 = nn.Conv2d(16, 32, 5)
         self.pool2 = nn.MaxPool2d(2)
-        self.fc1 = nn.Linear(32 * 5 * 5, 128)
+        self.conv3 = nn.Conv2d(32, 64, 5)
+        self.pool3 = nn.MaxPool2d(2)
+        self.fc1 = nn.Linear(64 * 5 * 5, 128)
         self.fc2 = nn.Linear(128, 64)
         self.fc3 = nn.Linear(64, n_classes)
 

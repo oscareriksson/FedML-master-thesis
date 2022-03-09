@@ -104,8 +104,8 @@ class FedEdServer(ServerBase):
         loss_function = nn.MSELoss()
         optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
-        model.train()
         for epoch in range(self.student_epochs):
+            model.train()   
             for x, y in student_train_loader:
                 x, y = x.to(self.device), y.to(self.device)
                 optimizer.zero_grad()
