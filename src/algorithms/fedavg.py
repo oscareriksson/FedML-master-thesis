@@ -29,7 +29,7 @@ class FedAvgServer(ServerBase):
                 avg_weights[param_name] = torch.zeros(self.global_model.state_dict()[param_name].shape).to(self.device)
             
             for j in range(self.n_clients):
-                print("Round {} : Training client nr {} ".format(i+1, j+1), end="\r")
+                print("Round {} : Training client nr {} ".format(i+1, j+1))
                 acc, loss = self._local_training(j)
                 local_accs[j].append(acc)
                 local_losses[j].append(loss)
@@ -60,10 +60,7 @@ class FedAvgServer(ServerBase):
         optimizer = optim.SGD(self.local_model.parameters(), lr=self.lr_rate, momentum=self.momentum)
 
         for i in range(self.local_epochs):
-            for x, y in tqdm(
-                self.train_loaders[client_nr],
-                leave=False,
-                desc=f"Epoch {i+1}/{self.local_epochs}"): 
+            for x, y in self.train_loaders[client_nr]:
                 x, y = x.to(self.device), y.to(self.device)
                 optimizer.zero_grad()
                 output = self.local_model(x)
@@ -71,7 +68,10 @@ class FedAvgServer(ServerBase):
                 error.backward()
                 optimizer.step()
 
-        train_acc, train_loss = self.evaluate(self.local_model, self.train_loaders[client_nr])
+            train_acc, train_loss = self.evaluate(self.local_model, self.train_loaders[client_nr])
+            print("Epoch {}/{} Train accuracy: {:.0f}%  Train loss: {:.4f}".format(
+                i+1, self.local_epochs, train_acc, train_loss), end="\r", flush=True)
+
         return train_acc, train_loss
     
     def _evaluate_train(self, client_nr):
