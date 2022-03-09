@@ -36,6 +36,10 @@ class PytorchDataset:
             train=True, 
             transform=transform, 
             download=True)
+        
+        if not torch.is_tensor(train_data.targets):
+            train_data.targets = torch.tensor(train_data.targets)
+
         if train_fraction is None:
             return Subset(train_data, [])
         else:

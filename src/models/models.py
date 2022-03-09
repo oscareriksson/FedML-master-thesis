@@ -43,7 +43,7 @@ class Mnist_Cnn(nn.Module):
 
 class Cifar_Cnn(nn.Module):
     def __init__(self, n_classes):
-        super(Cifar_Cnn).__init__()
+        super(Cifar_Cnn, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool1 = nn.MaxPool2d(2)
         self.conv2 = nn.Conv2d(6, 16, 5)

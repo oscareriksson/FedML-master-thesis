@@ -1,6 +1,7 @@
 from .dataset_base import PytorchDataset
 from torchvision.transforms import Compose, ToTensor, Normalize
 from torch.utils.data import Subset
+import torch
 
 
 class Cifar10(PytorchDataset):
@@ -20,6 +21,8 @@ class Cifar10(PytorchDataset):
             train=False, 
             transform=transform, 
             download=True)
+        
+        self.test_data.targets = torch.tensor(self.test_data.targets)
 
         self.public_data = Subset(self.test_data, [])
         self.num_workers = num_workers
