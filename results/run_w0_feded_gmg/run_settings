@@ -1,4 +1,4 @@
-settings_file cifar10_c10_f1.0_iid_a0.1_ygi
+settings_file cifar10_c10_f1.0_iid_a0.1_gmg
 algorithm feded
 n_rounds 1
 local_epochs 3
@@ -19,4 +19,4 @@ n_clients 10
 train_fraction 1.0
 distribution iid
 alpha 0.1
-settings_id ygi
+settings_id gmg
