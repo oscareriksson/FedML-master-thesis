@@ -30,8 +30,14 @@
 # python3 main.py --settings_file cifar10_c10_f1.0_iid_a0.1_xmo --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000
 # python3 main.py --settings_file cifar10_c10_f1.0_iid_a0.1_ygi --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000
 
-python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_bqa --algorithm fedavg --local_epochs 1 --n_rounds 150
-python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rff --algorithm fedavg --local_epochs 1 --n_rounds 150
-python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rgy --algorithm fedavg --local_epochs 1 --n_rounds 150
-python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rls --algorithm fedavg --local_epochs 1 --n_rounds 150
-python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_sew --algorithm fedavg --local_epochs 1 --n_rounds 150
+# python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_bqa --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000
+python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rff --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000
+python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rgy --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000
+python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rls --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000
+python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_sew --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000
+
+# python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_bqa --algorithm fedavg --local_epochs 1 --n_rounds 150
+# python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rff --algorithm fedavg --local_epochs 1 --n_rounds 150
+# python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rgy --algorithm fedavg --local_epochs 1 --n_rounds 150
+# python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rls --algorithm fedavg --local_epochs 1 --n_rounds 150
+# python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_sew --algorithm fedavg --local_epochs 1 --n_rounds 150
