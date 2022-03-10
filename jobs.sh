@@ -31,7 +31,7 @@
 # python3 main.py --settings_file cifar10_c10_f1.0_iid_a0.1_ygi --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000
 
 # python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_bqa --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000
-python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rff --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000 --num_workers 4
+python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rff --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000 --num_workers 6
 python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rgy --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000 --num_workers 4
 python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_rls --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000 --num_workers 4
 python3 main.py --settings_file cifar10_c10_f1.0_niid_a0.1_sew --algorithm feded --local_epochs_ensemble 60 --n_rounds 1 --student_epochs 1000 --num_workers 4
