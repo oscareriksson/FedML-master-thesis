@@ -20,16 +20,8 @@ class PytorchDataset:
         self.public_data = None
         self.num_workers = 0
 
-
-    def _sample_train_data(self, train_fraction, transform):
-        """ Sample a chosen fraction of the training dataset to use.
-
-            Parameters:
-            train_fraction  (float): Fraction of training data to use.
-            transform       (torchvision.transforms.Compose): Collection of transforms to apply on data.
-
-            Returns:
-            torch.utils.data.Subset: Subset of training data.
+    def _split_train_public(self, public_fraction, transform):
+        """ 
         """
         train_data = self.data_class(
             root='data', 
@@ -39,16 +31,10 @@ class PytorchDataset:
         
         if not torch.is_tensor(train_data.targets):
             train_data.targets = torch.tensor(train_data.targets)
-
-        if train_fraction is None:
-            return Subset(train_data, [])
-        else:
-            n_samples = len(train_data.targets)
-            index_limit = int(train_fraction * n_samples)
-            chosen_indices = np.random.choice(torch.arange(n_samples), size=index_limit, replace=False)
-            print(f"\nUsing {index_limit} training samples\n", flush=True)
-            return Subset(train_data, chosen_indices)
         
+        idx_split = int(len(train_data) * public_fraction)
+        
+        return Subset(train_data, np.arange(idx_split)), Subset(train_data, np.arange(idx_split, len(train_data)))
 
     def generate_client_data(self, n_clients, distribution, alpha):
         """ Generate iid client data or non-iid by sampling from Dirichlet distribution.
@@ -103,15 +89,6 @@ class PytorchDataset:
                     class_indices[each_class] = class_indices[each_class][local_size:]
 
         self.local_sets_indices = local_sets_indices
-
-    def split_test_public(self):
-        """
-        """
-
-        idx_split = int(len(self.test_data) * 7 / 10)
-        self.public_data = Subset(self.test_data, np.arange(idx_split))
-        self.test_data = Subset(self.test_data, np.arange(idx_split, len(self.test_data)))
-
 
     def get_train_data_loaders(self, batch_size):
         """ Get list of client training data loaders.
