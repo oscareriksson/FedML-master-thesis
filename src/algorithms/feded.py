@@ -47,8 +47,7 @@ class FedEdServer(ServerBase):
 
             logits_ensemble = self._increment_logits_ensemble(logits_ensemble, logits_local, j)
 
-        logits_ensemble = F.softmax(logits_ensemble, dim=1)
-        # Normalize scheme w2
+        # Normalize scheme w1, w2
         if self.weight_scheme in ["w1", "w2"]:
             logits_ensemble = torch.true_divide(logits_ensemble.T, torch.sum(logits_ensemble, axis=1)).T
 
@@ -178,14 +177,10 @@ class FedEdServer(ServerBase):
         with torch.no_grad():
             for x, _ in self.public_loader:
                 x = x.to(self.device)
-                # if logits_local is None:
-                #     logits_local = F.softmax(self.local_model(x), dim=1)
-                # else:
-                #     logits_local = torch.cat((logits_local, F.softmax(self.local_model(x), dim=1)))
                 if logits_local is None:
-                    logits_local = self.local_model(x)
+                    logits_local = F.softmax(self.local_model(x), dim=1)
                 else:
-                    logits_local = torch.cat((logits_local, self.local_model(x)))
+                    logits_local = torch.cat((logits_local, F.softmax(self.local_model(x), dim=1)))
 
         return logits_local.to(self.device)
     
