@@ -94,7 +94,7 @@ if __name__ == "__main__":
     parser.add_argument("--test_batch_size", type=int, default=64)
     parser.add_argument("--learning_rate", type=float, default=0.001, help="Local learning rate")
     parser.add_argument("--momentum", type=float, default=0.9, help="Local momentum")
-    parser.add_argument("--num_workers", type=int, default=2)
+    parser.add_argument("--num_workers", type=int, default=4)
 
     # Ensemble parameters
     parser.add_argument("--local_epochs_ensemble", type=int, default=1)
