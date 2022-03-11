@@ -48,7 +48,7 @@ class FedEdServer(ServerBase):
             logits_ensemble = self._increment_logits_ensemble(logits_ensemble, logits_local, j)
 
         # Normalize scheme w2
-        if self.weight_scheme == "w2":
+        if self.weight_scheme in ["w1", "w2"]:
             logits_ensemble = torch.true_divide(logits_ensemble.T, torch.sum(logits_ensemble, axis=1)).T
 
         self._save_results(local_accs, "client_accuracy")
@@ -102,7 +102,7 @@ class FedEdServer(ServerBase):
         model = create_model(self.dataset_name, student=True)
         model.to(self.device)
         loss_function = nn.L1Loss()
-        optimizer = optim.Adam(model.parameters(), lr=0.0001)
+        optimizer = optim.Adam(model.parameters(), lr=0.001)
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
         for epoch in range(self.student_epochs):
             model.train()   
@@ -181,6 +181,10 @@ class FedEdServer(ServerBase):
                     logits_local = F.softmax(self.local_model(x), dim=1)
                 else:
                     logits_local = torch.cat((logits_local, F.softmax(self.local_model(x), dim=1)))
+                # if logits_local is None:
+                #     logits_local = self.local_model(x)
+                # else:
+                #     logits_local = torch.cat((logits_local, self.local_model(x)))
 
         return logits_local.to(self.device)
     
