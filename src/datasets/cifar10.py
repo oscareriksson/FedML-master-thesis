@@ -7,7 +7,7 @@ import torch
 class Cifar10(PytorchDataset):
     """ Cifar10 dataset class.
     """
-    def __init__(self, num_workers, train_fraction=None):
+    def __init__(self, num_workers, public_fraction=0.5):
         super().__init__("CIFAR10")
         """ Constructor method.
 
@@ -24,8 +24,7 @@ class Cifar10(PytorchDataset):
         
         self.test_data.targets = torch.tensor(self.test_data.targets)
 
-        self.public_data = Subset(self.test_data, [])
-        self.num_workers = num_workers
+        self.public_data, self.train_data = self._split_train_public(public_fraction, transform)
 
-        self.train_data = self._sample_train_data(train_fraction, transform)
+        self.num_workers = num_workers
         self.n_samples = len(self.train_data)
