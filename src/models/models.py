@@ -66,13 +66,18 @@ class Mnist_Student(nn.Module):
     def __init__(self):
         super(Mnist_Student, self).__init__()
         self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
-        self.pool = nn.MaxPool2d(2)
-        self.fc1 = nn.Linear(16 * 14 * 14, 10)
+        self.pool1 = nn.MaxPool2d(2)
+        self.conv2 = nn.Conv2d(16, 32, 5, 1, 2)
+        self.pool2 = nn.MaxPool2d(2)
+        self.fc1 = nn.Linear(32 * 8 * 8, 64)
+        self.fc2 = nn.Linear(64, 10)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool1(F.relu(self.conv1(x)))
+        x = self.pool2(F.relu(self.conv2(x)))
         x = torch.flatten(x, 1)
-        x = self.fc1(x)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
         return x
 
 
