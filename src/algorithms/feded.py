@@ -188,7 +188,7 @@ class FedEdServer(ServerBase):
         """
         """
         _, ensemble_output = torch.max(ensemble_output, 1)
-        targets = torch.zeros(ensemble_output.shape)
+        targets = torch.zeros(ensemble_output.shape, dtype=torch.int64)
         for i in range(public_size):
             idx_public = self.public_loader.dataset.indices[i]
             targets[idx_public] = ensemble_output[i]
