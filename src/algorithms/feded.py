@@ -47,6 +47,7 @@ class FedEdServer(ServerBase):
 
             logits_ensemble = self._increment_logits_ensemble(logits_ensemble, logits_local, j)
 
+        logits_ensemble = F.softmax(logits_ensemble, dim=1)
         # Normalize scheme w2
         if self.weight_scheme in ["w1", "w2"]:
             logits_ensemble = torch.true_divide(logits_ensemble.T, torch.sum(logits_ensemble, axis=1)).T
