@@ -101,7 +101,7 @@ class FedEdServer(ServerBase):
         print("-- Training student model --", flush=True)
         model = create_model(self.dataset_name, student=True)
         model.to(self.device)
-        loss_function = nn.CrossEntropyLoss()
+        loss_function = nn.L1Loss()
         optimizer = optim.Adam(model.parameters(), lr=0.001)
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
         for epoch in range(self.student_epochs):
@@ -187,8 +187,8 @@ class FedEdServer(ServerBase):
     def _get_student_targets(self, ensemble_output, public_size):
         """
         """
-        _, ensemble_output = torch.max(ensemble_output, 1)
-        targets = torch.zeros(ensemble_output.shape, dtype=torch.int64)
+        #_, ensemble_output = torch.max(ensemble_output, 1)
+        targets = torch.zeros(ensemble_output.shape)
         for i in range(public_size):
             idx_public = self.public_loader.dataset.indices[i]
             targets[idx_public] = ensemble_output[i]
