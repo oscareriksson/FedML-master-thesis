@@ -187,7 +187,7 @@ class FedEdServer(ServerBase):
     def _get_student_targets(self, logits_ensemble, public_size):
         """
         """
-        n_total_samples = len(self.train_loader.dataset.data)
+        n_total_samples = len(self.public_loader.dataset.data)
         targets = torch.zeros(n_total_samples, self.n_classes)
         for i in range(public_size):
             idx_public = self.public_loader.dataset.indices[i]
