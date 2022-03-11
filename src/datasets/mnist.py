@@ -1,11 +1,10 @@
 from .dataset_base import PytorchDataset
 from torchvision.transforms import Compose, ToTensor, Normalize
-from torch.utils.data import Subset
 
 class Mnist(PytorchDataset):
     """ Mnist dataset class.
     """
-    def __init__(self, num_workers, train_fraction=None):
+    def __init__(self, num_workers, public_fraction=0.5):
         super().__init__("MNIST")
         """ Constructor method.
 
@@ -19,9 +18,8 @@ class Mnist(PytorchDataset):
             train=False, 
             transform=transform, 
             download=True)
+        
+        self.public_data, self.train_data = self._split_train_public(public_fraction, transform)
 
-        self.public_data = Subset(self.test_data, [])
         self.num_workers = num_workers
-
-        self.train_data = self._sample_train_data(train_fraction, transform)
         self.n_samples = len(self.train_data)
