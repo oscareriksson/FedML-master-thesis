@@ -69,7 +69,7 @@ class Mnist_Student(nn.Module):
         self.pool1 = nn.MaxPool2d(2)
         self.conv2 = nn.Conv2d(16, 32, 5, 1, 2)
         self.pool2 = nn.MaxPool2d(2)
-        self.fc1 = nn.Linear(32 * 8 * 8, 64)
+        self.fc1 = nn.Linear(32 * 7 * 7, 64)
         self.fc2 = nn.Linear(64, 10)
 
     def forward(self, x):
