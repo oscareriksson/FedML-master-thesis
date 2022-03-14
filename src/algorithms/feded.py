@@ -1,3 +1,4 @@
+from heapq import merge
 from pydoc import cli
 import sys
 from zmq import device
@@ -29,13 +30,15 @@ class FedEdServer(ServerBase):
         self.n_samples_train_public = len(public_loader.dataset.indices)
         self.weight_scheme = args.weight_scheme
 
+        self.student_loader = DataLoader(StudentData(public_loader.dataset), self.student_batch_size, shuffle=True)
+
     def run(self):
         """ Execute federated training and distillation.
 
             Parameters:
             round_nr    (int): Current round number.
         """
-        logits_ensemble = torch.zeros(self.n_samples_train_public, self.n_classes, device=self.device)
+        logits_ensemble = []
         local_accs, local_losses = [], []
         for j in range(self.n_clients):
             print("-- Training client nr {} --".format(j+1))
@@ -45,11 +48,7 @@ class FedEdServer(ServerBase):
             local_losses.extend([losses])
             logits_local = self._get_local_logits()
 
-            logits_ensemble = self._increment_logits_ensemble(logits_ensemble, logits_local, j)
-
-        # Normalize scheme w1, w2
-        if self.weight_scheme in ["w1", "w2"]:
-            logits_ensemble = torch.true_divide(logits_ensemble.T, torch.sum(logits_ensemble, axis=1)).T
+            logits_ensemble.append(logits_local)
 
         self._save_results(local_accs, "client_accuracy")
         self._save_results(local_losses, "client_loss")
@@ -58,7 +57,7 @@ class FedEdServer(ServerBase):
             print(f"Public dataset size: {public_size}")
             student_targets = self._get_student_targets(logits_ensemble, public_size)
             student_train_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(student_targets, public_size)
-            self._train_student(student_train_loader, public_train_loader, public_val_loader, public_size)
+            self._train_student(logits_ensemble, public_train_loader, public_val_loader, public_size)
 
             test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
         
@@ -97,7 +96,7 @@ class FedEdServer(ServerBase):
 
         return train_accs, train_losses
     
-    def _train_student(self, student_train_loader, public_train_loader, public_val_loader, public_size):
+    def _train_student(self, logits_ensemble, public_train_loader, public_val_loader, public_size):
         print("-- Training student model --", flush=True)
         model = create_model(self.dataset_name, student=True)
         model.to(self.device)
@@ -106,11 +105,16 @@ class FedEdServer(ServerBase):
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
         for epoch in range(self.student_epochs):
             model.train()   
-            for x, y in student_train_loader:
-                x, y = x.to(self.device), y.to(self.device)
+            for x, idx in self.student_loader:
+                x = x.to(self.device)
+                active_clients = np.random.choice(np.arange(self.n_clients), int(0.4 * self.n_clients), replace=False)
+                merged_logits = torch.zeros(self.student_batch_size, self.n_classes)
+
+                for c in active_clients:
+                    merged_logits += logits_ensemble[c][idx] * torch.sum(self.label_count_matrix[c]) / torch.sum(torch.sum(self.label_count_matrix[active_clients]))
                 optimizer.zero_grad()
                 output = model(x)
-                loss = loss_function(output, y)
+                loss = loss_function(output, merged_logits)
                 loss.backward()
                 optimizer.step()
             train_acc, train_loss = self.evaluate(model, public_train_loader)
