@@ -1,6 +1,5 @@
 from .dataset_base import PytorchDataset
-from torchvision.transforms import Compose, ToTensor, Normalize
-from torch.utils.data import Subset
+from torchvision.transforms import Compose, ToTensor, Normalize, Resize
 import torch
 
 
@@ -15,7 +14,8 @@ class Cifar10(PytorchDataset):
             train_fraction (float): Fraction of training data to use.
         """
 
-        transform = Compose([ToTensor(), Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))])
+        #transform = Compose([ToTensor(), Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261))])
+        transform = Compose([ToTensor(), Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
         self.test_data = self.data_class(
             root='data', 
             train=False, 
