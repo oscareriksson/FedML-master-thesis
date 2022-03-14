@@ -54,7 +54,8 @@ class Cifar_Cnn(nn.Module):
         self.conv6 = nn.Conv2d(128, 128, 5, 1, 2)
         self.pool3 = nn.MaxPool2d(2)
         self.fc1 = nn.Linear(128 * 4 * 4 , 128)
-        self.fc2 = nn.Linear(128, n_classes)
+        self.fc2 = nn.Linear(128, 128)
+        self.fc3 = nn.Linear(128, n_classes)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -65,7 +66,8 @@ class Cifar_Cnn(nn.Module):
         x = self.pool3(F.relu(self.conv6(x)))
         x = torch.flatten(x, 1)
         x = F.relu(self.fc1(x))
-        x = self.fc2(x)
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
         return x
 
 
