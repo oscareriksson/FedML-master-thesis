@@ -30,7 +30,7 @@ class FedEdServer(ServerBase):
         self.n_samples_train_public = len(public_loader.dataset.indices)
         self.weight_scheme = args.weight_scheme
 
-        self.student_loader = DataLoader(StudentData(public_loader.dataset), self.student_batch_size, shuffle=True)
+        self.student_loader = DataLoader(StudentData(public_loader.dataset), self.student_batch_size, shuffle=True, num_workers=self.num_workers)
 
     def run(self):
         """ Execute federated training and distillation.
@@ -55,8 +55,7 @@ class FedEdServer(ServerBase):
 
         for public_size in self.public_data_sizes:
             print(f"Public dataset size: {public_size}")
-            student_targets = self._get_student_targets(logits_ensemble, public_size)
-            student_train_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(student_targets, public_size)
+            public_train_loader, public_val_loader = self._get_student_data_loaders(public_size)
             self._train_student(logits_ensemble, public_train_loader, public_val_loader, public_size)
 
             test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
@@ -141,7 +140,7 @@ class FedEdServer(ServerBase):
         """
         return logits_ensemble + logits_local * self._get_scaling_factor(client_nr)
 
-    def _get_student_data_loaders(self, student_targets, data_size):
+    def _get_student_data_loaders(self, data_size):
         """
         """
         train_size = int(0.8 * data_size)
@@ -149,13 +148,10 @@ class FedEdServer(ServerBase):
         public_train_data, public_val_data = copy.deepcopy(self.public_loader.dataset), copy.deepcopy(self.public_loader.dataset)
         public_train_data.indices, public_val_data.indices = train_indices, val_indices
 
-        student_dataset = StudentData(public_train_data, student_targets)
-
-        student_train_loader = DataLoader(student_dataset, batch_size=self.student_batch_size, num_workers=self.num_workers)
         public_train_loader = DataLoader(public_train_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
         public_val_loader = DataLoader(public_val_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
 
-        return student_train_loader, public_train_loader, public_val_loader
+        return public_train_loader, public_val_loader
 
     def _get_scaling_factor(self, client_nr):
         """ Weight client contributions.
