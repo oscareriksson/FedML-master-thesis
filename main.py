@@ -59,6 +59,7 @@ def create_server(args, model, client_loaders, test_loader, public_loader, run_f
 
 
 def main(args):
+    torch.cuda.empty_cache()
     run_folder = prepare_run_folder(args)
     save_run_settings(args, run_folder)
 
