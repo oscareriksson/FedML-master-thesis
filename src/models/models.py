@@ -81,9 +81,9 @@ class Mnist_Student(nn.Module):
 class Cifar_Student(nn.Module):
     def __init__(self, n_classes):
         super(Cifar_Student, self).__init__()
-        base = vgg16(pretrained=False)
+        base = resnet18(pretrained=False)
         self.base = nn.Sequential(*list(base.children())[:-1])
-        in_features = base.classifier[0].in_features
+        in_features = base.fc.in_features
         self.drop = nn.Dropout()
         self.final = nn.Linear(in_features, n_classes)
     
