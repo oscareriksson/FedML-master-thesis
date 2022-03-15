@@ -99,7 +99,8 @@ class FedEdServer(ServerBase):
         model = create_model(self.dataset_name, student=True)
         model.to(self.device)
         loss_function = nn.MSELoss()
-        optimizer = optim.Adam(model.parameters(), lr=0.1)
+        optimizer = optim.Adam(model.parameters(), lr=0.001)
+        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.1)
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
         for epoch in range(self.student_epochs):
             model.train()   
@@ -109,13 +110,13 @@ class FedEdServer(ServerBase):
                 merged_logits = torch.zeros(self.student_batch_size, self.n_classes, device=self.device)
 
                 for c in active_clients:
-                    # merged_logits += logits_ensemble[c][idx] * torch.sum(self.label_count_matrix[c]) / torch.sum(torch.sum(self.label_count_matrix[active_clients]))
-                    merged_logits += logits_ensemble[c][idx] * 1 / int(0.4 * self.n_clients)
+                    merged_logits += logits_ensemble[c][idx] * torch.sum(self.label_count_matrix[c]) / torch.sum(torch.sum(self.label_count_matrix[active_clients]))
                 optimizer.zero_grad()
                 output = model(x)
                 loss = loss_function(output, merged_logits)
                 loss.backward()
                 optimizer.step()
+                scheduler.step()
             # train_acc, train_loss = self.evaluate(model, public_train_loader)
             # val_acc, val_loss = self.evaluate(model, public_val_loader)
 
