@@ -27,7 +27,6 @@ class FedEdServer(ServerBase):
         self.public_batch_size = args.public_batch_size
         self.student_epochs = args.student_epochs
         self.public_data_sizes = [int(x) for x in args.public_data_sizes.split(' ')]
-        self.n_samples_train_public = len(public_loader.dataset.indices)
         self.weight_scheme = args.weight_scheme
 
         self.student_loader = DataLoader(StudentData(public_loader.dataset), self.student_batch_size, shuffle=True, num_workers=self.num_workers)
