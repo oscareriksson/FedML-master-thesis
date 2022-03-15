@@ -111,10 +111,10 @@ class FedEdServer(ServerBase):
 
                 for c in active_clients:
                     merged_logits += logits_ensemble[c][idx] * torch.sum(self.label_count_matrix[c]) / torch.sum(torch.sum(self.label_count_matrix[active_clients]))
-                merged_logits = F.softmax(merged_logits / 2)
+                merged_logits = F.softmax(merged_logits / 2, dim=1)
                 optimizer.zero_grad()
                 output = model(x)
-                output = F.softmax(output / 2)
+                output = F.softmax(output / 2, dim=1)
                 loss = loss_function(output, merged_logits)
                 loss.backward()
                 optimizer.step()
