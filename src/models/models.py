@@ -48,7 +48,7 @@ class Cifar_Cnn(nn.Module):
         base = resnet18(pretrained=False)
         self.base = nn.Sequential(*list(base.children())[:-1])
         in_features = base.fc.in_features
-        self.drop = nn.Dropout(p=0.7)
+        self.drop = nn.Dropout()
         self.final = nn.Linear(in_features, n_classes)
     
     def forward(self,x):
