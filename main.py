@@ -79,9 +79,9 @@ def main(args):
     from torchvision.datasets import CIFAR100
     from torchvision.transforms import Compose, ToTensor, Normalize
     from torch.utils.data import DataLoader
-    public_data = CIFAR100(root='data', train=True, transform=Compose([ToTensor(), Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))]))
+    public_data = CIFAR100(root='data', train=True, download=True, transform=Compose([ToTensor(), Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))]))
     public_data_loader = DataLoader(public_data, batch_size=50, num_workers=4)
-    
+
     server = create_server(args, model, client_data_loaders, test_data_loader, public_data_loader, run_folder)
     server.run()
 
