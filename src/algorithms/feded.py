@@ -73,8 +73,7 @@ class FedEdServer(ServerBase):
         """
         self.local_model = copy.deepcopy(self.global_model).to(self.device)
         self.local_model.train()
-        optimizer = optim.SGD(self.local_model.parameters(), lr=100)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10, eta_min=0)
+        optimizer = optim.SGD(self.local_model.parameters(), lr=self.lr_rate, momentum=self.momentum)
         train_accs, train_losses = [], []
         for i in range(self.local_epochs_ensemble):
             for x, y in self.train_loaders[client_nr]:
@@ -84,7 +83,6 @@ class FedEdServer(ServerBase):
                 error = self.loss_function(output, y)
                 error.backward()
                 optimizer.step()
-                scheduler.step()
             train_acc, train_loss = self.evaluate(self.local_model, self.train_loaders[client_nr])
             train_accs.append(train_acc)
             train_losses.append(train_loss)
@@ -101,7 +99,8 @@ class FedEdServer(ServerBase):
         model = create_model(self.dataset_name, student=True)
         model.to(self.device)
         loss_function = nn.MSELoss()
-        optimizer = optim.Adam(model.parameters(), lr=0.01)
+        optimizer = optim.Adam(model.parameters(), lr=100)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10, eta_min=0)
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
         for epoch in range(self.student_epochs):
             model.train()   
@@ -117,6 +116,7 @@ class FedEdServer(ServerBase):
                 loss = loss_function(output, merged_logits)
                 loss.backward()
                 optimizer.step()
+                scheduler.step()
             # train_acc, train_loss = self.evaluate(model, public_train_loader)
             # val_acc, val_loss = self.evaluate(model, public_val_loader)
 
