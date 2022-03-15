@@ -115,16 +115,21 @@ class FedEdServer(ServerBase):
                 loss = loss_function(output, merged_logits)
                 loss.backward()
                 optimizer.step()
-            train_acc, train_loss = self.evaluate(model, public_train_loader)
-            val_acc, val_loss = self.evaluate(model, public_val_loader)
+            # train_acc, train_loss = self.evaluate(model, public_train_loader)
+            # val_acc, val_loss = self.evaluate(model, public_val_loader)
 
-            train_accs.append(train_acc)
-            train_losses.append(train_loss)
-            val_accs.append(val_acc)
-            val_losses.append(val_loss)
+            # train_accs.append(train_acc)
+            # train_losses.append(train_loss)
+            # val_accs.append(val_acc)
+            # val_losses.append(val_loss)
 
-            print("Epoch {}/{} Train accuracy: {:.0f}%  Train loss: {:.4f} Val accuracy: {:.0f}%  Val loss: {:.4f}".format(
-                epoch+1, self.student_epochs, train_acc, train_loss, val_acc, val_loss), end="\r", flush=True)
+            # print("Epoch {}/{} Train accuracy: {:.0f}%  Train loss: {:.4f} Val accuracy: {:.0f}%  Val loss: {:.4f}".format(
+            #     epoch+1, self.student_epochs, train_acc, train_loss, val_acc, val_loss), end="\r", flush=True)
+
+            test_acc, test_loss = self.evaluate(model, self.test_loader)
+
+            print("Epoch {}/{} Test accuracy: {:.0f}%  Test loss: {:.4f} ".format(
+                epoch+1, self.student_epochs, test_acc, test_loss), end="\r", flush=True)
 
         self.global_model = model
         self._save_results([train_accs, train_losses, val_accs, val_losses], f'student_train_results{public_size}')
