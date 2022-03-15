@@ -99,8 +99,7 @@ class FedEdServer(ServerBase):
         model = create_model(self.dataset_name, student=True)
         model.to(self.device)
         loss_function = nn.MSELoss()
-        optimizer = optim.Adam(model.parameters(), lr=0.001)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10, eta_min=0)
+        optimizer = optim.Adam(model.parameters(), lr=0.1)
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
         for epoch in range(self.student_epochs):
             model.train()   
@@ -117,7 +116,6 @@ class FedEdServer(ServerBase):
                 loss = loss_function(output, merged_logits)
                 loss.backward()
                 optimizer.step()
-                scheduler.step()
             # train_acc, train_loss = self.evaluate(model, public_train_loader)
             # val_acc, val_loss = self.evaluate(model, public_val_loader)
 
