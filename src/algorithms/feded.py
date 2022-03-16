@@ -29,8 +29,6 @@ class FedEdServer(ServerBase):
         self.public_data_sizes = [int(x) for x in args.public_data_sizes.split(' ')]
         self.weight_scheme = args.weight_scheme
 
-        self.student_loader = DataLoader(StudentData(public_loader.dataset), self.student_batch_size, shuffle=True, num_workers=self.num_workers)
-
     def run(self):
         """ Execute federated training and distillation.
 
@@ -56,8 +54,8 @@ class FedEdServer(ServerBase):
 
         for public_size in self.public_data_sizes:
             print(f"Public dataset size: {public_size}")
-            public_train_loader, public_val_loader = self._get_student_data_loaders(public_size)
-            self._train_student(logits_ensemble, public_train_loader, public_val_loader, public_size)
+            student_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(public_size)
+            self._train_student(logits_ensemble, student_loader, public_train_loader, public_val_loader, public_size)
 
             test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
         
@@ -96,7 +94,7 @@ class FedEdServer(ServerBase):
 
         return train_accs, train_losses
     
-    def _train_student(self, logits_ensemble, public_train_loader, public_val_loader, public_size):
+    def _train_student(self, logits_ensemble, student_loader, public_train_loader, public_val_loader, public_size):
         print("-- Training student model --", flush=True)
         model = create_model(self.dataset_name, student=True)
         model.to(self.device)
@@ -106,7 +104,7 @@ class FedEdServer(ServerBase):
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
         for epoch in range(self.student_epochs):
             model.train()   
-            for x, idx in self.student_loader:
+            for x, idx in student_loader:
                 x = x.to(self.device)
                 active_clients = np.random.choice(np.arange(self.n_clients), int(0.4 * self.n_clients), replace=False)
                 merged_logits = torch.zeros(self.student_batch_size, self.n_classes, device=self.device)
@@ -154,8 +152,9 @@ class FedEdServer(ServerBase):
 
         public_train_loader = DataLoader(public_train_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
         public_val_loader = DataLoader(public_val_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
+        student_loader = DataLoader(StudentData(public_train_data), self.student_batch_size, shuffle=True, num_workers=self.num_workers)
 
-        return public_train_loader, public_val_loader
+        return student_loader, public_train_loader, public_val_loader
 
     def _get_scaling_factor(self, client_nr):
         """ Weight client contributions.
