@@ -202,7 +202,7 @@ class FedEdServer(ServerBase):
     def _ensemble_accuracy(self, ensemble_logits):
         merged_logits = torch.zeros(ensemble_logits[0].shape)
 
-        for c in self.n_clients:
+        for c in range(self.n_clients):
             merged_logits += ensemble_logits[c] * torch.sum(self.label_count_matrix[c]) / torch.sum(torch.sum(self.label_count_matrix))
         
         targets = self.public_loader.dataset.dataset.targets[self.public_loader.dataset.indices]
