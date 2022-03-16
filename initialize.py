@@ -17,7 +17,7 @@ def prepare_settings_folder(path_name):
     return settings_folder
 
 def initialize_data(args):
-    assert args.dataset in ["mnist", "cifar10", "cifar100"], f"Chosen dataset is not available."
+    assert args.dataset in ["mnist", "cifar10", "emnist"], f"Chosen dataset is not available."
     module = importlib.import_module(f"src.datasets.{args.dataset}")
     data_class_ = getattr(module, args.dataset.title())
 
@@ -50,11 +50,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", type=str, default="mnist")
-    parser.add_argument("--model_name", type=str, default="mnist_cnn")
+    parser.add_argument("--dataset", type=str, default="emnist")
+    parser.add_argument("--model_name", type=str, default="emnist_cnn")
     parser.add_argument("--n_clients", type=int, default=10, help="Number of clients per round")
     parser.add_argument("--public_fraction", type=float, default=0.5)
-    parser.add_argument("--distribution", type=str, default="niid")
+    parser.add_argument("--distribution", type=str, default="iid")
     parser.add_argument("--alpha", type=float, default=0.1)
 
     args = parser.parse_args()
