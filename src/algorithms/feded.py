@@ -200,7 +200,7 @@ class FedEdServer(ServerBase):
         return targets
 
     def _ensemble_accuracy(self, ensemble_logits):
-        merged_logits = torch.zeros(ensemble_logits[0].shape)
+        merged_logits = torch.zeros(ensemble_logits[0].shape, device=self.device)
 
         for c in range(self.n_clients):
             merged_logits += ensemble_logits[c] * torch.sum(self.label_count_matrix[c]) / torch.sum(torch.sum(self.label_count_matrix))
