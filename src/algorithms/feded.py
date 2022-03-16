@@ -52,7 +52,7 @@ class FedEdServer(ServerBase):
         self._save_results(local_accs, "client_accuracy")
         self._save_results(local_losses, "client_loss")
 
-        print("Ensemble accuracy: {:.4f}%".format(self._ensemble_accuracy(logits_ensemble)))
+        print("Ensemble accuracy: {:.0f}%".format(self._ensemble_accuracy(logits_ensemble)))
 
         for public_size in self.public_data_sizes:
             print(f"Public dataset size: {public_size}")
