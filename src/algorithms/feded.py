@@ -52,6 +52,8 @@ class FedEdServer(ServerBase):
         self._save_results(local_accs, "client_accuracy")
         self._save_results(local_losses, "client_loss")
 
+        print(f"Ensemble accuracy: {self._ensemble_accuracy(logits_ensemble)}")
+
         for public_size in self.public_data_sizes:
             print(f"Public dataset size: {public_size}")
             public_train_loader, public_val_loader = self._get_student_data_loaders(public_size)
@@ -196,3 +198,15 @@ class FedEdServer(ServerBase):
             targets[idx_public] = ensemble_output[i]
         
         return targets
+
+    def _ensemble_accuracy(self, ensemble_logits):
+        merged_logits = torch.zeros(ensemble_logits[0].shape)
+
+        for c in self.n_clients:
+            merged_logits += ensemble_logits[c] * torch.sum(self.label_count_matrix[c]) / torch.sum(torch.sum(self.label_count_matrix))
+        
+        targets = self.public_loader.dataset.dataset.targets[self.public_loader.dataset.indices]
+        _, preds = torch.max(merged_logits, 1)
+        correct = (preds == targets).sum().item()
+
+        return correct / len(self.public_loader.dataset)
