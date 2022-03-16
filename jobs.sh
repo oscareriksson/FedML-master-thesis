@@ -41,3 +41,6 @@ python3 main.py --settings_file cifar10_c10_iid_a0.1_zcv --algorithm feded --loc
 python3 main.py --settings_file cifar10_c10_niid_a0.1_hop --algorithm feded --local_epochs_ensemble 100 --n_rounds 1 --student_epochs 100 --public_data_sizes="1000 5000 10000 25000" --weight_scheme w1
 python3 main.py --settings_file cifar10_c10_niid_a0.1_mpf --algorithm feded --local_epochs_ensemble 100 --n_rounds 1 --student_epochs 100 --public_data_sizes="1000 5000 10000 25000" --weight_scheme w1
 python3 main.py --settings_file cifar10_c10_niid_a0.1_tug --algorithm feded --local_epochs_ensemble 100 --n_rounds 1 --student_epochs 100 --public_data_sizes="1000 5000 10000 25000" --weight_scheme w1
+
+
+python3 main.py --settings_file cifar10_c20_iid_a0.1_upq --algorithm feded --local_epochs_ensemble 1 --n_rounds 1 --student_epochs 30 --public_data_sizes="1000 10000 25000"

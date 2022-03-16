@@ -20,14 +20,23 @@ class PytorchDataset:
         self.public_data = None
         self.num_workers = 0
 
-    def _split_train_public(self, public_fraction, transform):
+    def _split_train_public(self, public_fraction, transform, split=None):
         """ 
         """
-        train_data = self.data_class(
-            root='data', 
-            train=True, 
-            transform=transform, 
-            download=True)
+        if split is None:
+            train_data = self.data_class(
+                root='data', 
+                train=True, 
+                transform=transform, 
+                download=True)
+        else:
+            train_data = self.data_class(
+                root='data', 
+                train=True, 
+                transform=transform, 
+                download=True,
+                split=split)
+            train_data.targets = train_data.targets - 1
         
         if not torch.is_tensor(train_data.targets):
             train_data.targets = torch.tensor(train_data.targets)
