@@ -98,7 +98,7 @@ class FedEdServer(ServerBase):
         print("-- Training student model --", flush=True)
         model = create_model(self.dataset_name, student=True)
         model.to(self.device)
-        loss_function = nn.KLDivLoss()
+        loss_function = nn.MSELoss()
         optimizer = optim.Adam(model.parameters(), lr=0.001)
 
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
@@ -111,28 +111,23 @@ class FedEdServer(ServerBase):
 
                 for c in active_clients:
                     merged_logits += logits_ensemble[c][idx] * torch.sum(self.label_count_matrix[c]) / torch.sum(torch.sum(self.label_count_matrix[active_clients]))
-                merged_logits = F.softmax(merged_logits / 10, dim=1)
+
                 optimizer.zero_grad()
                 output = model(x)
-                output = F.softmax(output / 10, dim=1)
                 loss = loss_function(output, merged_logits)
                 loss.backward()
                 optimizer.step()
-            # train_acc, train_loss = self.evaluate(model, public_train_loader)
-            # val_acc, val_loss = self.evaluate(model, public_val_loader)
+            train_acc, train_loss = self.evaluate(model, public_train_loader)
+            val_acc, val_loss = self.evaluate(model, public_val_loader)
 
-            # train_accs.append(train_acc)
-            # train_losses.append(train_loss)
-            # val_accs.append(val_acc)
-            # val_losses.append(val_loss)
+            train_accs.append(train_acc)
+            train_losses.append(train_loss)
+            val_accs.append(val_acc)
+            val_losses.append(val_loss)
 
-            # print("Epoch {}/{} Train accuracy: {:.0f}%  Train loss: {:.4f} Val accuracy: {:.0f}%  Val loss: {:.4f}".format(
-            #     epoch+1, self.student_epochs, train_acc, train_loss, val_acc, val_loss), end="\r", flush=True)
+            print("Epoch {}/{} Train accuracy: {:.0f}%  Train loss: {:.4f} Val accuracy: {:.0f}%  Val loss: {:.4f}".format(
+                epoch+1, self.student_epochs, train_acc, train_loss, val_acc, val_loss), end="\r", flush=True)
 
-            test_acc, test_loss = self.evaluate(model, self.test_loader)
-
-            print("Epoch {}/{} Test accuracy: {:.0f}%  Test loss: {:.4f} ".format(
-                epoch+1, self.student_epochs, test_acc, test_loss), end="\r", flush=True)
 
         self.global_model = model
         self._save_results([train_accs, train_losses, val_accs, val_losses], f'student_train_results{public_size}')
