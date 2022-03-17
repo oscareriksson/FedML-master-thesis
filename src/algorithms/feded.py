@@ -150,7 +150,7 @@ class FedEdServer(ServerBase):
         for c in range(self.n_clients):
             merged_logits += ensemble_logits[c] * self._ensemble_weight(client_nr=c, active_clients=np.arange(self.n_clients))
         _, targets = torch.max(merged_logits, 1)
-
+        print(targets.shape) ###
         train_size = int(0.8 * data_size)
         train_indices, val_indices = np.arange(train_size), np.arange(train_size, data_size)
         public_train_data = copy.deepcopy(self.public_loader.dataset)
