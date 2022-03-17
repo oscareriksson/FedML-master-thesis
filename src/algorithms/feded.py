@@ -107,11 +107,11 @@ class FedEdServer(ServerBase):
             model.train()   
             for x, idx in student_loader:
                 x = x.to(self.device)
-                active_clients = np.random.choice(np.arange(self.n_clients), int(0.4 * self.n_clients), replace=False)
+                active_clients = np.random.choice(np.arange(self.n_clients), int(self.client_sample_fraction * self.n_clients), replace=False)
                 merged_logits = torch.zeros(self.student_batch_size, self.n_classes, device=self.device)
 
                 for c in active_clients:
-                    merged_logits += logits_ensemble[c][idx] * self._ensemble_weight()
+                    merged_logits += logits_ensemble[c][idx] * self._ensemble_weight(client_nr=c, active_clients=active_clients)
 
                 optimizer.zero_grad()
                 output = model(x)
