@@ -146,15 +146,15 @@ class FedEdServer(ServerBase):
     def _get_student_data_loaders(self, data_size, ensemble_logits):
         """
         """
-        merged_logits = torch.zeros(ensemble_logits[0].shape)
+        merged_logits = torch.zeros(ensemble_logits[0].shape, device=self.device)
         for c in range(self.n_clients):
             merged_logits += ensemble_logits[c] * self._ensemble_weight(client_nr=c, active_clients=np.arange(self.n_clients))
         _, targets = torch.max(merged_logits, 1)
-
+    
         train_size = int(0.8 * data_size)
         train_indices, val_indices = np.arange(train_size), np.arange(train_size, data_size)
         public_train_data = copy.deepcopy(self.public_loader.dataset)
-        public_train_data.dataset.targets = targets
+        public_train_data.dataset.targets = targets.to('cpu')
         public_val_data = copy.deepcopy(public_train_data)
         public_train_data.indices, public_val_data.indices = train_indices, val_indices
 
