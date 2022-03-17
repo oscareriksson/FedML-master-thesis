@@ -28,6 +28,7 @@ class FedEdServer(ServerBase):
         self.student_epochs = args.student_epochs
         self.public_data_sizes = [int(x) for x in args.public_data_sizes.split(' ')]
         self.weight_scheme = args.weight_scheme
+        self.client_sample_fraction = args.client_sample_fraction
 
     def run(self):
         """ Execute federated training and distillation.
@@ -110,7 +111,7 @@ class FedEdServer(ServerBase):
                 merged_logits = torch.zeros(self.student_batch_size, self.n_classes, device=self.device)
 
                 for c in active_clients:
-                    merged_logits += logits_ensemble[c][idx] * torch.sum(self.label_count_matrix[c]) / torch.sum(torch.sum(self.label_count_matrix[active_clients]))
+                    merged_logits += logits_ensemble[c][idx] * self._ensemble_weight()
 
                 optimizer.zero_grad()
                 output = model(x)
@@ -156,16 +157,16 @@ class FedEdServer(ServerBase):
 
         return student_loader, public_train_loader, public_val_loader
 
-    def _get_scaling_factor(self, client_nr):
+    def _ensemble_weight(self, client_nr, active_clients):
         """ Weight client contributions.
 
             Parameters:
             client_nr   (int): ID for client.
         """
         if self.weight_scheme == "w0":
-            return self.n_samples_client[client_nr] / sum(self.n_samples_client)
+            return self.n_samples_client[client_nr] / sum(self.n_samples_client[active_clients])
         elif self.weight_scheme == "w1":
-            return torch.true_divide(self.label_count_matrix[client_nr], torch.sum(self.label_count_matrix, axis=0))
+            return torch.true_divide(self.label_count_matrix[client_nr], torch.sum(self.label_count_matrix[active_clients], axis=0))
         elif self.weight_scheme == "w2":
             return self.label_count_matrix[client_nr]
         else:

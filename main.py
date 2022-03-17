@@ -99,6 +99,7 @@ if __name__ == "__main__":
 
     # Ensemble parameters
     parser.add_argument("--local_epochs_ensemble", type=int, default=1)
+    parser.add_argument("--client_sample_fraction", type=float, default=0.4)
     parser.add_argument("--public_batch_size", type=int, default=64)
     parser.add_argument("--student_batch_size", type=int, default=64)
     parser.add_argument("--student_epochs", type=int, default=1)
