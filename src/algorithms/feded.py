@@ -154,7 +154,7 @@ class FedEdServer(ServerBase):
         train_size = int(0.8 * data_size)
         train_indices, val_indices = np.arange(train_size), np.arange(train_size, data_size)
         public_train_data = copy.deepcopy(self.public_loader.dataset)
-        public_train_data.dataset.targets = targets.to(self.device)
+        public_train_data.dataset.targets[len(targets)] = targets
         public_val_data = copy.deepcopy(public_train_data)
         public_train_data.indices, public_val_data.indices = train_indices, val_indices
 
