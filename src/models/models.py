@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import sys
-from torchvision.models import resnet18, vgg16
+from torchvision.models import resnet18
 
 def create_model(model_name, student=False):
     if not student:
@@ -25,8 +25,6 @@ def create_model(model_name, student=False):
         else:
             print("Model name is not supported.")
             sys.exit()
-
-
 
 class Mnist_Cnn(nn.Module):
     def __init__(self):

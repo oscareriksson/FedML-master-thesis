@@ -111,7 +111,12 @@ class FedEdServer(ServerBase):
                 merged_logits = torch.zeros(self.student_batch_size, self.n_classes, device=self.device)
 
                 for c in active_clients:
-                    merged_logits += ensemble_logits[c][idx] * self._ensemble_weight(client_nr=c, active_clients=active_clients)
+                    if len(idx) != self.student_batch_size:
+                        selected_logits = torch.zeros(self.student_batch_size, self.n_classes, device=self.device)
+                        selected_logits[:len(idx), self.n_classes] = ensemble_logits[c][idx]
+                    else:
+                        selected_logits = ensemble_logits[c][idx]
+                    merged_logits += selected_logits * self._ensemble_weight(client_nr=c, active_clients=active_clients)
 
                 optimizer.zero_grad()
                 output = model(x)
