@@ -173,7 +173,7 @@ class FedEdServer(ServerBase):
         if self.weight_scheme == "w0":
             return self.n_samples_client[client_nr] / sum([self.n_samples_client[c] for c in active_clients])
         elif self.weight_scheme == "w1":
-            return torch.true_divide(self.label_count_matrix[client_nr], torch.sum(self.label_count_matrix[active_clients], axis=0))
+            return torch.true_divide(self.label_count_matrix[client_nr], torch.sum(self.label_count_matrix[active_clients], axis=0)+0.001)
         elif self.weight_scheme == "w2":
             return self.label_count_matrix[client_nr]
         else:
