@@ -160,7 +160,7 @@ class FedEdServer(ServerBase):
 
         public_train_loader = DataLoader(public_train_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
         public_val_loader = DataLoader(public_val_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
-        student_loader = DataLoader(StudentData(public_train_data), self.student_batch_size, shuffle=True, num_workers=self.num_workers)
+        student_loader = DataLoader(StudentData(copy.deepcopy(self.public_loader.dataset)), self.student_batch_size, shuffle=True, num_workers=self.num_workers)
 
         return student_loader, public_train_loader, public_val_loader
 
