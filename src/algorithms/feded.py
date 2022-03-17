@@ -36,7 +36,7 @@ class FedEdServer(ServerBase):
             Parameters:
             round_nr    (int): Current round number.
         """
-        logits_ensemble = []
+        ensemble_logits = []
         local_accs, local_losses = [], []
         for j in range(self.n_clients):
             print("-- Training client nr {} --".format(j+1))
@@ -46,17 +46,17 @@ class FedEdServer(ServerBase):
             local_losses.extend([losses])
             logits_local = self._get_local_logits()
 
-            logits_ensemble.append(logits_local)
+            ensemble_logits.append(logits_local)
 
         self._save_results(local_accs, "client_accuracy")
         self._save_results(local_losses, "client_loss")
 
-        print("Ensemble accuracy: {:.0f}%".format(self._ensemble_accuracy(logits_ensemble)))
+        print("Ensemble accuracy: {:.0f}%".format(self._ensemble_accuracy(ensemble_logits)))
 
         for public_size in self.public_data_sizes:
             print(f"Public dataset size: {public_size}")
-            student_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(public_size)
-            self._train_student(logits_ensemble, student_loader, public_train_loader, public_val_loader, public_size)
+            student_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(public_size, ensemble_logits)
+            self._train_student(ensemble_logits, student_loader, public_train_loader, public_val_loader, public_size)
 
             test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
         
@@ -95,7 +95,7 @@ class FedEdServer(ServerBase):
 
         return train_accs, train_losses
     
-    def _train_student(self, logits_ensemble, student_loader, public_train_loader, public_val_loader, public_size):
+    def _train_student(self, ensemble_logits, student_loader, public_train_loader, public_val_loader, public_size):
         print("-- Training student model --", flush=True)
         model = create_model(self.dataset_name, student=True)
         model.to(self.device)
@@ -111,7 +111,7 @@ class FedEdServer(ServerBase):
                 merged_logits = torch.zeros(self.student_batch_size, self.n_classes, device=self.device)
 
                 for c in active_clients:
-                    merged_logits += logits_ensemble[c][idx] * self._ensemble_weight(client_nr=c, active_clients=active_clients)
+                    merged_logits += ensemble_logits[c][idx] * self._ensemble_weight(client_nr=c, active_clients=active_clients)
 
                 optimizer.zero_grad()
                 output = model(x)
@@ -133,22 +133,29 @@ class FedEdServer(ServerBase):
         self.global_model = model
         self._save_results([train_accs, train_losses, val_accs, val_losses], f'student_train_results{public_size}')
 
-    def _increment_logits_ensemble(self, logits_ensemble, logits_local, client_nr):
+    def _increment_ensemble_logits(self, ensemble_logits, logits_local, client_nr):
         """ Update the ensembled logits on public dataset.
         
             Parameters:
-            logits_ensemble
+            ensemble_logits
             logits_local
             client_nr
         """
-        return logits_ensemble + logits_local * self._get_scaling_factor(client_nr)
+        return ensemble_logits + logits_local * self._get_scaling_factor(client_nr)
 
-    def _get_student_data_loaders(self, data_size):
+    def _get_student_data_loaders(self, data_size, ensemble_logits):
         """
         """
+        merged_logits = torch.zeros(ensemble_logits[0].shape, device=self.device)
+        for c in range(self.n_clients):
+            merged_logits += ensemble_logits[c] * self._ensemble_weight(client_nr=c, active_clients=np.arange(self.n_clients))
+        _, targets = torch.max(merged_logits, 1)
+
         train_size = int(0.8 * data_size)
         train_indices, val_indices = np.arange(train_size), np.arange(train_size, data_size)
-        public_train_data, public_val_data = copy.deepcopy(self.public_loader.dataset), copy.deepcopy(self.public_loader.dataset)
+        public_train_data = copy.deepcopy(self.public_loader.dataset)
+        public_train_data.dataset.targets = targets
+        public_val_data = copy.deepcopy(public_train_data)
         public_train_data.indices, public_val_data.indices = train_indices, val_indices
 
         public_train_loader = DataLoader(public_train_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
@@ -203,7 +210,7 @@ class FedEdServer(ServerBase):
         merged_logits = torch.zeros(ensemble_logits[0].shape, device=self.device)
 
         for c in range(self.n_clients):
-            merged_logits += ensemble_logits[c] * torch.sum(self.label_count_matrix[c]) / torch.sum(torch.sum(self.label_count_matrix))
+            merged_logits += ensemble_logits[c] * self._ensemble_weight(client_nr=c, active_clients=np.arange(self.n_clients))
         
         targets = self.public_loader.dataset.dataset.targets[self.public_loader.dataset.indices].to(self.device)
         _, preds = torch.max(merged_logits, 1)
