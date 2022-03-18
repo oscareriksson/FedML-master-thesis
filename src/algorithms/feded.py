@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from ..models.models import create_model
+from ..models.models import Autoencoder, create_model
 from ..datasets.dataset_student import StudentData
 import numpy as np
 import sys
@@ -25,6 +25,7 @@ class FedEdServer(ServerBase):
         self.public_data_sizes = [int(x) for x in args.public_data_sizes.split(' ')]
         self.weight_scheme = args.weight_scheme
         self.client_sample_fraction = args.client_sample_fraction
+        self.auto_weights = []
 
     def run(self):
         """ Execute federated training and distillation.
@@ -57,6 +58,9 @@ class FedEdServer(ServerBase):
             student_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(public_size, ensemble_public_logits)
 
             self._train_student(ensemble_public_logits, student_loader, public_train_loader, public_val_loader, public_size)
+            
+            if self.weight_scheme == 2:
+                self.auto_weights.append(self._get_autoencoder_weights(client_nr=j))
 
             test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
         
@@ -116,7 +120,8 @@ class FedEdServer(ServerBase):
                         selected_logits[:len(idx), self.n_classes] = ensemble_logits[c][idx]
                     else:
                         selected_logits = ensemble_logits[c][idx]
-                    merged_logits += selected_logits * self._ensemble_weight(client_nr=c, active_clients=active_clients)
+                        
+                    merged_logits += selected_logits * self._ensemble_weight(client_nr=c, active_clients=active_clients, sample_indices=idx)
 
                 optimizer.zero_grad()
                 output = model(x)
@@ -137,6 +142,42 @@ class FedEdServer(ServerBase):
 
         self.global_model = model
         self._save_results([train_accs, train_losses, val_accs, val_losses], f'student_train_results{public_size}')
+
+    def _get_autoencoder_weights(self, client_nr):
+        """
+        """
+        autoencoder = create_model("autoencoder")
+        optimizer = torch.optim.Adam(autoencoder.parameters(), lr=0.001, weight_decay=1e-05)
+        loss_fn = nn.MSELoss()
+        n_epochs = 30
+        print("Training autoencoder")
+        for epoch in range(n_epochs):
+            autoencoder.train()
+            train_loss = []
+
+            for img_batch, _ in self.train_loaders[client_nr]: 
+                output = autoencoder(img_batch)
+                loss = loss_fn(output, img_batch)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                train_loss.append(loss.detach().cpu().numpy())
+
+            train_loss = np.mean(train_loss)
+            print('Epoch {}/{} \t train loss {}'.format(epoch + 1, n_epochs,train_loss), end="\r")
+        print("")
+
+        autoencoder.eval()
+        public_samples_loss = []
+        with torch.no_grad():
+            for img_batch, _ in self.public_loader:
+                output = autoencoder(img_batch)
+                sample_loss = []
+                for j in range(len(img_batch)):
+                    sample_loss.append(torch.mean((output[j]-img_batch[j])*(output[j]-img_batch[j])))
+                public_samples_loss.extend(sample_loss)
+                
+        return torch.tensor(1/abs(public_samples_loss-train_loss))
 
     def _get_student_data_loaders(self, data_size, ensemble_logits):
         """
@@ -159,7 +200,7 @@ class FedEdServer(ServerBase):
 
         return student_loader, public_train_loader, public_val_loader
 
-    def _ensemble_weight(self, client_nr, active_clients):
+    def _ensemble_weight(self, client_nr, active_clients, sample_indices):
         """ Weight client contributions.
 
             Parameters:
@@ -170,7 +211,7 @@ class FedEdServer(ServerBase):
         elif self.weight_scheme == 1:
             return torch.true_divide(self.label_count_matrix[client_nr], torch.sum(self.label_count_matrix[active_clients], axis=0)+0.001)
         elif self.weight_scheme == 2:
-            return self.label_count_matrix[client_nr]
+            return self.auto_weights[client_nr][sample_indices, None]
         else:
             print("Chosen weight scheme is not implemented.")
             sys.exit(0)

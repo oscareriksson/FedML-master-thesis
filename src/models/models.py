@@ -15,6 +15,8 @@ def create_model(model_name):
         return Emnist_Cnn2()
     elif model_name == "cifar10_resnet":
         return Cifar10_Resnet()
+    elif model_name == "autoencoder":
+        return Autoencoder(1)
     else:
         print("Model name is not supported.")
         sys.exit()
@@ -100,3 +102,61 @@ class Cifar10_Resnet(nn.Module):
         x = self.base(x)
         x = self.drop(x.view(-1,self.final.in_features))
         return self.final(x)
+
+
+class Autoencoder(nn.Module):
+    def __init__(self, input_channels):
+        super().__init__()
+        
+        ### Convolutional section
+        self.encoder_cnn = nn.Sequential(
+            nn.Conv2d(input_channels, 8, 3, stride=2, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(8, 16, 3, stride=2, padding=1),
+            nn.BatchNorm2d(16),
+            nn.ReLU(True),
+            nn.Conv2d(16, 32, 3, stride=2, padding=0),
+            nn.ReLU(True)
+        )
+        
+        ### Flatten layer
+        self.flatten = nn.Flatten(start_dim=1)
+        ### Linear section
+        self.encoder_lin = nn.Sequential(
+            nn.Linear(3 * 3 * 32, 128),
+            nn.ReLU(True),
+            nn.Linear(128, 4)
+        )
+        
+        self.decoder_lin = nn.Sequential(
+            nn.Linear(4, 128),
+            nn.ReLU(True),
+            nn.Linear(128, 3 * 3 * 32),
+            nn.ReLU(True)
+        )
+        
+        self.unflatten = nn.Unflatten(dim=1, 
+        unflattened_size=(32, 3, 3))
+
+        self.decoder_conv = nn.Sequential(
+            nn.ConvTranspose2d(32, 16, 3, 
+            stride=2, output_padding=0),
+            nn.BatchNorm2d(16),
+            nn.ReLU(True),
+            nn.ConvTranspose2d(16, 8, 3, stride=2, 
+            padding=1, output_padding=1),
+            nn.BatchNorm2d(8),
+            nn.ReLU(True),
+            nn.ConvTranspose2d(8, 1, 3, stride=2, 
+            padding=1, output_padding=1)
+        )
+        
+    def forward(self, x):
+        x = self.encoder_cnn(x)
+        x = self.flatten(x)
+        x = self.encoder_lin(x)
+        x = self.decoder_lin(x)
+        x = self.unflatten(x)
+        x = self.decoder_conv(x)
+        x = torch.sigmoid(x)
+        return x
