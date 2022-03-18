@@ -55,7 +55,7 @@ class FedEdServer(ServerBase):
         for public_size in self.public_data_sizes:
             print(f"Public dataset size: {public_size}")
             student_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(public_size, ensemble_public_logits)
-            print(len(public_train_loader.dataset))
+
             self._train_student(ensemble_public_logits, student_loader, public_train_loader, public_val_loader, public_size)
 
             test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
