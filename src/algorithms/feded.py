@@ -148,7 +148,7 @@ class FedEdServer(ServerBase):
         autoencoder = create_model("autoencoder")
         optimizer = torch.optim.Adam(autoencoder.parameters(), lr=0.001, weight_decay=1e-05)
         loss_fn = nn.MSELoss()
-        n_epochs = 30
+        n_epochs = 1
         print("Training autoencoder")
         for epoch in range(n_epochs):
             autoencoder.train()
