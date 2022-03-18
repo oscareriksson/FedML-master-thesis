@@ -42,6 +42,8 @@ class FedEdServer(ServerBase):
             local_accs.extend([accs])
             local_losses.extend([losses])
             local_public_logits, local_test_logits  = self._get_local_logits()
+            if self.weight_scheme == 2:
+                self.auto_weights.append(self._get_autoencoder_weights(client_nr=j))
 
             ensemble_public_logits.append(local_public_logits)
             ensemble_test_logits.append(local_test_logits)
@@ -58,9 +60,6 @@ class FedEdServer(ServerBase):
             student_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(public_size, ensemble_public_logits)
 
             self._train_student(ensemble_public_logits, student_loader, public_train_loader, public_val_loader, public_size)
-            
-            if self.weight_scheme == 2:
-                self.auto_weights.append(self._get_autoencoder_weights(client_nr=j))
 
             test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
         
