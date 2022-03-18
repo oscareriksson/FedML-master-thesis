@@ -120,7 +120,7 @@ class FedEdServer(ServerBase):
                         selected_logits[:len(idx), self.n_classes] = ensemble_logits[c][idx]
                     else:
                         selected_logits = ensemble_logits[c][idx]
-                        
+
                     merged_logits += selected_logits * self._ensemble_weight(client_nr=c, active_clients=active_clients, sample_indices=idx)
 
                 optimizer.zero_grad()
@@ -200,7 +200,7 @@ class FedEdServer(ServerBase):
 
         return student_loader, public_train_loader, public_val_loader
 
-    def _ensemble_weight(self, client_nr, active_clients, sample_indices):
+    def _ensemble_weight(self, client_nr, active_clients, sample_indices=None):
         """ Weight client contributions.
 
             Parameters:
