@@ -51,7 +51,7 @@ class FedEdServer(ServerBase):
 
         self._save_results(local_accs, "client_accuracy")
         self._save_results(local_losses, "client_loss")
-        self._save_results(ensemble_test_acc, "ensemble_test_acc")
+        self._save_results([ensemble_test_acc], "ensemble_test_acc")
 
         for public_size in self.public_data_sizes:
             print(f"Public dataset size: {public_size}")
