@@ -7,7 +7,7 @@ import numpy as np
 
 
 def prepare_run_folder(args):
-    if args.algorithms == "feded":
+    if args.algorithm == "feded":
         model_names = f"{args.local_model}_{args.student_model}"
     else:
         model_names = f"{args.local_model}"
