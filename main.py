@@ -5,11 +5,10 @@ import sys
 import os
 import torch
 import numpy as np
-import string
-import random
+
 
 def prepare_run_folder(args):
-    run_folder = f"./results/run_{args.weight_scheme}_{args.algorithm}_{args.settings_id}"
+    run_folder = f"./results/{args.dataset}/{args.algorithm}/c{args.n_clients}_T{args.local_model}_S{args.student_model}_w{args.weight_scheme}_{args.settings_id}"
     if not os.path.exists(run_folder):
         os.makedirs(run_folder)
     return run_folder
@@ -86,8 +85,8 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--settings_file", type=str, default="mnist_c10_iid_a0.1_dyx")
-    parser.add_argument("--algorithm", type=str, default="feded")
+    parser.add_argument("--settings_file", type=str)
+    parser.add_argument("--algorithm", type=str)
     parser.add_argument("--n_rounds", type=int, default=1)
     parser.add_argument("--local_epochs", type=int, default=1)
     parser.add_argument("--mu", type=float, default=0.0)
@@ -98,13 +97,14 @@ if __name__ == "__main__":
     parser.add_argument("--num_workers", type=int, default=4)
 
     # Ensemble parameters
+    parser.add_argument("--student_model", type=str, default="mnist_cnn1")
     parser.add_argument("--local_epochs_ensemble", type=int, default=1)
     parser.add_argument("--client_sample_fraction", type=float, default=0.4)
     parser.add_argument("--public_batch_size", type=int, default=64)
     parser.add_argument("--student_batch_size", type=int, default=50)
     parser.add_argument("--student_epochs", type=int, default=1)
     parser.add_argument("--public_data_sizes", type=str, default="1000 3000 5000 7000")
-    parser.add_argument("--weight_scheme", type=str, default="w0")
+    parser.add_argument("--weight_scheme", type=int, default=0)
 
 
     args = parser.parse_args()
@@ -112,10 +112,11 @@ if __name__ == "__main__":
     init_data = args.settings_file.split("_")
     dargs = vars(args)
     dargs['dataset'] = init_data[0]
-    dargs['n_clients'] = int(init_data[1][1:])
-    dargs['distribution'] = init_data[2]
-    dargs['alpha'] = float(init_data[3][1:])
-    dargs['settings_id'] = init_data[4]
+    dargs['local_model'] = init_data[0] + "_" + init_data[1]
+    dargs['n_clients'] = int(init_data[2][1:])
+    dargs['distribution'] = init_data[3]
+    dargs['alpha'] = float(init_data[4][1:])
+    dargs['settings_id'] = init_data[5]
 
     print("=" * 80)
     print("Summary of training process:")
