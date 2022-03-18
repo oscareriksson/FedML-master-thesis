@@ -4,7 +4,6 @@ import torch.optim as optim
 from collections import OrderedDict
 import torch.nn.functional as F
 import torch
-from tqdm import tqdm
 
 
 class FedAvgServer(ServerBase):
