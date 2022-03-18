@@ -1,6 +1,7 @@
 from heapq import merge
 from pydoc import cli
 import sys
+from sklearn import ensemble
 from zmq import device
 from .server_base import ServerBase
 import copy
@@ -21,6 +22,7 @@ class FedEdServer(ServerBase):
     def __init__(self, args, model, run_folder, train_loaders, test_loader, public_loader) -> None:
         super().__init__(args, model, run_folder, train_loaders, test_loader, public_loader)
 
+        self.student_model = args.student_model
         self.logits_local = None
         self.local_epochs_ensemble = args.local_epochs_ensemble
         self.student_batch_size = args.student_batch_size
@@ -36,7 +38,7 @@ class FedEdServer(ServerBase):
             Parameters:
             round_nr    (int): Current round number.
         """
-        ensemble_logits = []
+        ensemble_public_logits, ensemble_test_logits = [], []
         local_accs, local_losses = [], []
         for j in range(self.n_clients):
             print("-- Training client nr {} --".format(j+1))
@@ -44,19 +46,22 @@ class FedEdServer(ServerBase):
             accs, losses = self._local_training(j)
             local_accs.extend([accs])
             local_losses.extend([losses])
-            logits_local = self._get_local_logits()
+            local_public_logits, local_test_logits  = self._get_local_logits()
 
-            ensemble_logits.append(logits_local)
+            ensemble_public_logits.append(local_public_logits)
+            ensemble_test_logits.append(local_test_logits)
+
+        ensemble_test_acc = self._ensemble_accuracy(ensemble_test_logits)
+        print("Ensemble test accuracy: {:.0f}%".format(ensemble_test_acc))
 
         self._save_results(local_accs, "client_accuracy")
         self._save_results(local_losses, "client_loss")
-
-        print("Ensemble accuracy: {:.0f}%".format(self._ensemble_accuracy(ensemble_logits)))
+        self._save_results(ensemble_test_acc, "ensemble_test_acc")
 
         for public_size in self.public_data_sizes:
             print(f"Public dataset size: {public_size}")
-            student_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(public_size, ensemble_logits)
-            self._train_student(ensemble_logits, student_loader, public_train_loader, public_val_loader, public_size)
+            student_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(public_size, ensemble_public_logits)
+            self._train_student(ensemble_public_logits, student_loader, public_train_loader, public_val_loader, public_size)
 
             test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
         
@@ -97,7 +102,7 @@ class FedEdServer(ServerBase):
     
     def _train_student(self, ensemble_logits, student_loader, public_train_loader, public_val_loader, public_size):
         print("-- Training student model --", flush=True)
-        model = create_model(self.dataset_name, student=True)
+        model = create_model(self.student_model)
         model.to(self.device)
         loss_function = nn.MSELoss()
         optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -175,11 +180,11 @@ class FedEdServer(ServerBase):
             Parameters:
             client_nr   (int): ID for client.
         """
-        if self.weight_scheme == "w0":
+        if self.weight_scheme == 0:
             return self.n_samples_client[client_nr] / sum([self.n_samples_client[c] for c in active_clients])
-        elif self.weight_scheme == "w1":
+        elif self.weight_scheme == 1:
             return torch.true_divide(self.label_count_matrix[client_nr], torch.sum(self.label_count_matrix[active_clients], axis=0)+0.001)
-        elif self.weight_scheme == "w2":
+        elif self.weight_scheme == 2:
             return self.label_count_matrix[client_nr]
         else:
             print("Chosen weight scheme is not implemented.")
@@ -189,16 +194,25 @@ class FedEdServer(ServerBase):
         """
         """
         self.local_model.eval()
-        logits_local = None
+        public_logits = None
         with torch.no_grad():
             for x, _ in self.public_loader:
                 x = x.to(self.device)
-                if logits_local is None:
-                    logits_local = F.softmax(self.local_model(x), dim=1)
+                if public_logits is None:
+                    public_logits = F.softmax(self.local_model(x), dim=1)
                 else:
-                    logits_local = torch.cat((logits_local, F.softmax(self.local_model(x), dim=1)))
+                    public_logits = torch.cat((public_logits, F.softmax(self.local_model(x), dim=1)))
 
-        return logits_local.to(self.device)
+        test_logits = None
+        with torch.no_grad():
+            for x, _ in self.test_loader:
+                x = x.to(self.device)
+                if test_logits is None:
+                    test_logits = F.softmax(self.local_model(x), dim=1)
+                else:
+                    test_logits = torch.cat((test_logits, F.softmax(self.local_model(x), dim=1)))
+
+        return public_logits.to(self.device), test_logits.to(self.device)
     
     def _get_student_targets(self, ensemble_output, public_size):
         """
@@ -217,7 +231,8 @@ class FedEdServer(ServerBase):
         for c in range(self.n_clients):
             merged_logits += ensemble_logits[c] * self._ensemble_weight(client_nr=c, active_clients=np.arange(self.n_clients))
         
-        targets = self.public_loader.dataset.dataset.targets[self.public_loader.dataset.indices].to(self.device)
+        #targets = self.public_loader.dataset.dataset.targets[self.public_loader.dataset.indices].to(self.device)
+        targets = self.test_loader.dataset.targets.to(self.device)
         _, preds = torch.max(merged_logits, 1)
         correct = (preds == targets).sum().item()
 

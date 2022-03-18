@@ -4,31 +4,24 @@ import torch.nn.functional as F
 import sys
 from torchvision.models import resnet18
 
-def create_model(model_name, student=False):
-    if not student:
-        if model_name == "mnist_cnn":
-            return Mnist_Cnn()
-        if model_name == "emnist_cnn":
-            return Emnist_Cnn()
-        elif model_name == "cifar10_cnn":
-            return Cifar_Cnn(10)
-        else:
-            print("Model name is not supported.")
-            sys.exit()
+def create_model(model_name):
+    if model_name == "mnist_cnn1":
+        return Mnist_Cnn1()
+    elif model_name == "mnist_cnn2":
+        return Mnist_Cnn2()
+    elif model_name == "emnist_cnn1":
+        return Emnist_Cnn1()
+    elif model_name == "emnist_cnn2":
+        return Emnist_Cnn2()
+    elif model_name == "cifar_resnet":
+        return Cifar_Resnet()
     else:
-        if model_name == "mnist":
-            return Mnist_Student()
-        if model_name == "emnist":
-            return Emnist_Student()
-        elif model_name == "cifar10":
-            return Cifar_Student(10)
-        else:
-            print("Model name is not supported.")
-            sys.exit()
+        print("Model name is not supported.")
+        sys.exit()
 
-class Mnist_Cnn(nn.Module):
+class Mnist_Cnn1(nn.Module):
     def __init__(self):
-        super(Mnist_Cnn, self).__init__()
+        super(Mnist_Cnn1, self).__init__()
         self.conv1 = nn.Conv2d(1, 2, 5, 1, 2)
         self.pool = nn.MaxPool2d(4)
         self.fc1 = nn.Linear(2 * 7 * 7, 10)
@@ -39,9 +32,9 @@ class Mnist_Cnn(nn.Module):
         x = self.fc1(x)
         return x
 
-class Mnist_Student(nn.Module):
+class Mnist_Cnn2(nn.Module):
     def __init__(self):
-        super(Mnist_Student, self).__init__()
+        super(Mnist_Cnn2, self).__init__()
         self.conv1 = nn.Conv2d(1, 6, 5, 1, 2)
         self.pool1 = nn.MaxPool2d(2)
         self.conv2 = nn.Conv2d(6, 16, 5, 1, 2)
@@ -60,9 +53,9 @@ class Mnist_Student(nn.Module):
         return x
 
 
-class Emnist_Cnn(nn.Module):
+class Emnist_Cnn1(nn.Module):
     def __init__(self):
-        super(Emnist_Cnn, self).__init__()
+        super(Emnist_Cnn1, self).__init__()
         self.conv1 = nn.Conv2d(1, 2, 5, 1, 2)
         self.pool = nn.MaxPool2d(4)
         self.fc1 = nn.Linear(2 * 7 * 7, 26)
@@ -73,9 +66,9 @@ class Emnist_Cnn(nn.Module):
         x = self.fc1(x)
         return x
 
-class Emnist_Student(nn.Module):
+class Emnist_Cnn2(nn.Module):
     def __init__(self):
-        super(Emnist_Student, self).__init__()
+        super(Emnist_Cnn2, self).__init__()
         self.conv1 = nn.Conv2d(1, 6, 5, 1, 2)
         self.pool1 = nn.MaxPool2d(2)
         self.conv2 = nn.Conv2d(6, 16, 5, 1, 2)
@@ -94,32 +87,16 @@ class Emnist_Student(nn.Module):
         return x
 
 
-class Cifar_Cnn(nn.Module):
-    def __init__(self, n_classes):
-        super(Cifar_Cnn, self).__init__()
+class Cifar_Resnet(nn.Module):
+    def __init__(self):
+        super(Cifar_Resnet, self).__init__()
         base = resnet18(pretrained=False)
         self.base = nn.Sequential(*list(base.children())[:-1])
         in_features = base.fc.in_features
         self.drop = nn.Dropout()
-        self.final = nn.Linear(in_features, n_classes)
+        self.final = nn.Linear(in_features, 10)
     
     def forward(self,x):
         x = self.base(x)
         x = self.drop(x.view(-1,self.final.in_features))
         return self.final(x)
-
-
-class Cifar_Student(nn.Module):
-    def __init__(self, n_classes):
-        super(Cifar_Student, self).__init__()
-        base = resnet18(pretrained=False)
-        self.base = nn.Sequential(*list(base.children())[:-1])
-        in_features = base.fc.in_features
-        self.drop = nn.Dropout()
-        self.final = nn.Linear(in_features, n_classes)
-    
-    def forward(self,x):
-        x = self.base(x)
-        x = self.drop(x.view(-1,self.final.in_features))
-        return self.final(x)
-
