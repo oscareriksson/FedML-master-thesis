@@ -13,8 +13,8 @@ def create_model(model_name):
         return Emnist_Cnn1()
     elif model_name == "emnist_cnn2":
         return Emnist_Cnn2()
-    elif model_name == "cifar_resnet":
-        return Cifar_Resnet()
+    elif model_name == "cifar10_resnet":
+        return Cifar10_Resnet()
     else:
         print("Model name is not supported.")
         sys.exit()
@@ -87,9 +87,9 @@ class Emnist_Cnn2(nn.Module):
         return x
 
 
-class Cifar_Resnet(nn.Module):
+class Cifar10_Resnet(nn.Module):
     def __init__(self):
-        super(Cifar_Resnet, self).__init__()
+        super(Cifar10_Resnet, self).__init__()
         base = resnet18(pretrained=False)
         self.base = nn.Sequential(*list(base.children())[:-1])
         in_features = base.fc.in_features
