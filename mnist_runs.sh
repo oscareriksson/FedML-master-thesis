@@ -1,25 +1,29 @@
 #!/bin/sh
 
-# python3 main.py --settings_file mnist_c10_iid_a0.1_hrq --algorithm fedavg --local_epochs 1 --n_rounds 100
-# python3 main.py --settings_file mnist_c10_iid_a0.1_suu --algorithm fedavg --local_epochs 1 --n_rounds 100
-# python3 main.py --settings_file mnist_c10_iid_a0.1_zdr --algorithm fedavg --local_epochs 1 --n_rounds 100
+python3 main.py --settings_file mnist_cnn1_c10_iid_ljh --algorithm fedavg --local_epochs 1 --n_rounds 100
+python3 main.py --settings_file mnist_cnn1_c10_iid_llw --algorithm fedavg --local_epochs 1 --n_rounds 100
+python3 main.py --settings_file mnist_cnn1_c10_iid_uto --algorithm fedavg --local_epochs 1 --n_rounds 100
 
-# python3 main.py --settings_file mnist_c10_niid_a0.1_jsc --algorithm fedavg --local_epochs 1 --n_rounds 100
-# python3 main.py --settings_file mnist_c10_niid_a0.1_exf --algorithm fedavg --local_epochs 1 --n_rounds 100
-# python3 main.py --settings_file mnist_c10_niid_a0.1_mjm --algorithm fedavg --local_epochs 1 --n_rounds 100
+python3 main.py --settings_file mnist_cnn1_c10_niid0.1_anr --algorithm fedavg --local_epochs 1 --n_rounds 100
+python3 main.py --settings_file mnist_cnn1_c10_niid0.1_bud --algorithm fedavg --local_epochs 1 --n_rounds 100
+python3 main.py --settings_file mnist_cnn1_c10_niid0.1_bxf --algorithm fedavg --local_epochs 1 --n_rounds 100
 
-python3 main.py --settings_file mnist_c20_iid_a0.1_azo --algorithm fedavg --local_epochs 1 --n_rounds 100
-python3 main.py --settings_file mnist_c20_iid_a0.1_jnl --algorithm fedavg --local_epochs 1 --n_rounds 100
-python3 main.py --settings_file mnist_c20_iid_a0.1_ocy --algorithm fedavg --local_epochs 1 --n_rounds 100
+python3 main.py --settings_file mnist_cnn1_c10_iid_ljh --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn1 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 0
+python3 main.py --settings_file mnist_cnn1_c10_iid_llw --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn1 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 0
+python3 main.py --settings_file mnist_cnn1_c10_iid_uto --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn1 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 0
 
-python3 main.py --settings_file mnist_c20_niid_a0.1_hjs --algorithm fedavg --local_epochs 1 --n_rounds 100
-python3 main.py --settings_file mnist_c20_niid_a0.1_meb --algorithm fedavg --local_epochs 1 --n_rounds 100
-python3 main.py --settings_file mnist_c20_niid_a0.1_tfy --algorithm fedavg --local_epochs 1 --n_rounds 100
+python3 main.py --settings_file mnist_cnn1_c10_iid_ljh --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn2 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 0
+python3 main.py --settings_file mnist_cnn1_c10_iid_llw --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn2 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 0
+python3 main.py --settings_file mnist_cnn1_c10_iid_uto --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn2 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 0
 
-# python3 main.py --settings_file mnist_c10_iid_a0.1_hrq --algorithm feded --local_epochs 20 --n_rounds 1 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.4 --student_epochs 30
-# python3 main.py --settings_file mnist_c10_iid_a0.1_suu --algorithm feded --local_epochs 20 --n_rounds 1 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.4 --student_epochs 30
-# python3 main.py --settings_file mnist_c10_iid_a0.1_zdr --algorithm feded --local_epochs 20 --n_rounds 1 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.4 --student_epochs 30
+python3 main.py --settings_file mnist_cnn1_c10_niid0.1_anr --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn1 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 0
+python3 main.py --settings_file mnist_cnn1_c10_niid0.1_bud --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn1 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 0
+python3 main.py --settings_file mnist_cnn1_c10_niid0.1_bxf --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn1 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 0
 
-# python3 main.py --settings_file mnist_c10_niid_a0.1_jsc --algorithm feded --local_epochs 20 --n_rounds 1 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.4 --student_epochs 30
-# python3 main.py --settings_file mnist_c10_niid_a0.1_exf --algorithm feded --local_epochs 20 --n_rounds 1 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.4 --student_epochs 30
-# python3 main.py --settings_file mnist_c10_niid_a0.1_mjm --algorithm feded --local_epochs 20 --n_rounds 1 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.4 --student_epochs 30
+python3 main.py --settings_file mnist_cnn1_c10_niid0.1_anr --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn2 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 0
+python3 main.py --settings_file mnist_cnn1_c10_niid0.1_bud --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn2 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 0
+python3 main.py --settings_file mnist_cnn1_c10_niid0.1_bxf --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn2 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 0
+
+python3 main.py --settings_file mnist_cnn1_c10_niid0.1_anr --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn2 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 1
+python3 main.py --settings_file mnist_cnn1_c10_niid0.1_bud --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn2 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 1
+python3 main.py --settings_file mnist_cnn1_c10_niid0.1_bxf --algorithm feded --local_epochs_ensemble 20 --student_model mnist_cnn2 --public_data_sizes="500 1000 5000 15000 30000" --client_sample_fraction 0.8 --student_epochs 30 --weight_scheme 1
