@@ -25,7 +25,7 @@ def save_run_settings(args, run_folder):
 
 
 def load_data_loaders(args, local_indices, public_indices):
-    assert args.dataset in ["mnist", "cifar10", "emnist"], f"Chosen dataset is not available."
+    assert args.dataset in ["mnist", "cifar", "emnist"], f"Chosen dataset is not available."
     module = importlib.import_module(f"src.datasets.{args.dataset}")
     data_class_ = getattr(module, args.dataset.title())
 
