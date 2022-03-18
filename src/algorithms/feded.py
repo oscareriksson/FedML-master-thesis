@@ -5,11 +5,10 @@ import torch.nn.functional as F
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from tqdm import tqdm
 from ..models.models import create_model
 from ..datasets.dataset_student import StudentData
 import numpy as np
-
+import sys
 
 class FedEdServer(ServerBase):
     """ Class defining server for federated ensemble distillation.
@@ -138,16 +137,6 @@ class FedEdServer(ServerBase):
         self.global_model = model
         self._save_results([train_accs, train_losses, val_accs, val_losses], f'student_train_results{public_size}')
 
-    def _increment_ensemble_logits(self, ensemble_logits, logits_local, client_nr):
-        """ Update the ensembled logits on public dataset.
-        
-            Parameters:
-            ensemble_logits
-            logits_local
-            client_nr
-        """
-        return ensemble_logits + logits_local * self._get_scaling_factor(client_nr)
-
     def _get_student_data_loaders(self, data_size, ensemble_logits):
         """
         """
@@ -231,4 +220,4 @@ class FedEdServer(ServerBase):
         _, preds = torch.max(merged_logits, 1)
         correct = (preds == targets).sum().item()
 
-        return 100. * correct / len(self.public_loader.dataset)
+        return 100. * correct / len(self.test_loader.dataset)
