@@ -115,8 +115,7 @@ if __name__ == "__main__":
     dargs['local_model'] = init_data[0] + "_" + init_data[1]
     dargs['n_clients'] = int(init_data[2][1:])
     dargs['distribution'] = init_data[3]
-    dargs['alpha'] = float(init_data[4][1:])
-    dargs['settings_id'] = init_data[5]
+    dargs['settings_id'] = init_data[4]
 
     print("=" * 80)
     print("Summary of training process:")
