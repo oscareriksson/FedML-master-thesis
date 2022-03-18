@@ -45,13 +45,15 @@ def main(args):
         for indices in local_indices:
             np.save(f, indices)
     
+    print(f"# public samples = {len(public_indices)}")
+    print(f"# training samples = {sum([len(indices) for indices in local_indices])}")
     print(f"Saved settings in: {settings_folder}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", type=str, default="emnist")
-    parser.add_argument("--model_name", type=str, default="emnist_cnn")
+    parser.add_argument("--dataset", type=str, default="mnist")
+    parser.add_argument("--model_name", type=str, default="mnist_cnn")
     parser.add_argument("--n_clients", type=int, default=10, help="Number of clients per round")
     parser.add_argument("--public_fraction", type=float, default=0.5)
     parser.add_argument("--distribution", type=str, default="iid")
