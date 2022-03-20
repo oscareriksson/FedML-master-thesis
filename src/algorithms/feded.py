@@ -48,7 +48,7 @@ class FedEdServer(ServerBase):
             ensemble_public_logits.append(local_public_logits)
             ensemble_test_logits.append(local_test_logits)
 
-        ensemble_test_acc = self._ensemble_accuracy(ensemble_test_logits)
+        ensemble_test_acc = self._ensemble_accuracy(ensemble_public_logits) # Should be test logits
         print("Ensemble test accuracy: {:.0f}%".format(ensemble_test_acc))
 
         self._save_results(local_accs, "client_accuracy")
