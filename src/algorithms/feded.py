@@ -101,8 +101,7 @@ class FedEdServer(ServerBase):
     
     def _train_student(self, ensemble_logits, student_loader, public_train_loader, public_val_loader, public_size):
         print("-- Training student model --", flush=True)
-        model = create_model(self.student_model)
-        model.to(self.device)
+        model = create_model(self.student_model).to(self.device)
         loss_function = nn.MSELoss()
         optimizer = optim.Adam(model.parameters(), lr=0.001)
 
@@ -146,7 +145,7 @@ class FedEdServer(ServerBase):
     def _get_autoencoder_weights(self, client_nr):
         """
         """
-        autoencoder = create_model("autoencoder")
+        autoencoder = create_model("autoencoder").to(self.device)
         optimizer = torch.optim.Adam(autoencoder.parameters(), lr=0.001, weight_decay=1e-05)
         loss_fn = nn.MSELoss()
 
@@ -156,6 +155,7 @@ class FedEdServer(ServerBase):
             train_loss = []
 
             for img_batch, _ in self.train_loaders[client_nr]: 
+                img_batch = img_batch.to(self.device)
                 output = autoencoder(img_batch)
                 loss = loss_fn(output, img_batch)
                 optimizer.zero_grad()
