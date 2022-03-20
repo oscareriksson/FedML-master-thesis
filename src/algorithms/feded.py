@@ -110,6 +110,7 @@ class FedEdServer(ServerBase):
             model.train()   
             for x, idx in student_loader:
                 x = x.to(self.device)
+                idx = idx.to(self.device)
                 active_clients = np.random.choice(np.arange(self.n_clients), int(self.client_sample_fraction * self.n_clients), replace=False)
                 merged_logits = torch.zeros(self.student_batch_size, self.n_classes, device=self.device)
 
@@ -178,7 +179,7 @@ class FedEdServer(ServerBase):
                     sample_loss.append(torch.mean((output[j]-img_batch[j])*(output[j]-img_batch[j])))
                 public_samples_loss.extend(sample_loss)
                 
-        return torch.tensor([(train_loss/sample_loss)**2 for sample_loss in public_samples_loss], device=self.device)
+        return torch.tensor([(train_loss/sample_loss)**3 for sample_loss in public_samples_loss], device=self.device)
 
     def _get_student_data_loaders(self, data_size, ensemble_logits):
         """
@@ -195,9 +196,12 @@ class FedEdServer(ServerBase):
         public_val_data = copy.deepcopy(public_train_data)
         public_train_data.indices, public_val_data.indices = train_indices, val_indices
 
+        student_data = copy.deepcopy(self.public_loader.dataset)
+        student_data.indices = train_indices
+
         public_train_loader = DataLoader(public_train_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
         public_val_loader = DataLoader(public_val_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
-        student_loader = DataLoader(StudentData(copy.deepcopy(self.public_loader.dataset)), self.student_batch_size, shuffle=True, num_workers=self.num_workers)
+        student_loader = DataLoader(StudentData(student_data), self.student_batch_size, shuffle=True, num_workers=self.num_workers)
 
         return student_loader, public_train_loader, public_val_loader
 
