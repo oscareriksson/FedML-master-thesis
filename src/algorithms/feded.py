@@ -178,7 +178,7 @@ class FedEdServer(ServerBase):
                     sample_loss.append(torch.mean((output[j]-img_batch[j])*(output[j]-img_batch[j])))
                 public_samples_loss.extend(sample_loss)
                 
-        return torch.tensor([1/abs(sample_loss-train_loss) for sample_loss in public_samples_loss], device=self.device)
+        return torch.tensor([(train_loss/sample_loss)**2 for sample_loss in public_samples_loss], device=self.device)
 
     def _get_student_data_loaders(self, data_size, ensemble_logits):
         """
