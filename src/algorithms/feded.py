@@ -259,8 +259,8 @@ class FedEdServer(ServerBase):
         for c in range(self.n_clients):
             merged_logits += ensemble_logits[c] * self._ensemble_weight(client_nr=c, active_clients=np.arange(self.n_clients))
         
-        #targets = self.public_loader.dataset.dataset.targets[self.public_loader.dataset.indices].to(self.device)
-        targets = self.test_loader.dataset.targets.to(self.device)
+        targets = self.public_loader.dataset.dataset.targets[self.public_loader.dataset.indices].to(self.device)
+        #targets = self.test_loader.dataset.targets.to(self.device)
         _, preds = torch.max(merged_logits, 1)
         correct = (preds == targets).sum().item()
 
