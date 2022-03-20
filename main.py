@@ -109,6 +109,7 @@ if __name__ == "__main__":
     parser.add_argument("--student_epochs", type=int, default=1)
     parser.add_argument("--public_data_sizes", type=str, default="1000 3000 5000 7000")
     parser.add_argument("--weight_scheme", type=int, default=0)
+    parser.add_argument("--autoencoder_epochs", type=int, default=1)
 
 
     args = parser.parse_args()
