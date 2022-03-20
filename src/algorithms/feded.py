@@ -210,7 +210,10 @@ class FedEdServer(ServerBase):
         elif self.weight_scheme == 1:
             return torch.true_divide(self.label_count_matrix[client_nr], torch.sum(self.label_count_matrix[active_clients], axis=0)+0.001)
         elif self.weight_scheme == 2:
-            return self.auto_weights[client_nr][sample_indices, None]
+            if sample_indices is None:
+                return self.auto_weights[client_nr][:, None]
+            else:
+                return self.auto_weights[client_nr][sample_indices, None]
         else:
             print("Chosen weight scheme is not implemented.")
             sys.exit(0)
