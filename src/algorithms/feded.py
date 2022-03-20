@@ -164,7 +164,7 @@ class FedEdServer(ServerBase):
                 train_loss.append(loss.detach().cpu().numpy())
 
             train_loss = np.mean(train_loss)
-            print('Epoch {}/{} \t train loss {}'.format(epoch + 1, n_epochs,train_loss), end="\r")
+            print('Epoch {}/{} \t train loss {}'.format(epoch + 1, self.autoencoder_epochs, train_loss), end="\r")
         print("")
 
         autoencoder.eval()
