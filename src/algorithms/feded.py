@@ -106,7 +106,7 @@ class FedEdServer(ServerBase):
         print("-- Training student model --", flush=True)
         model = create_model(self.student_model).to(self.device)
         loss_function = nn.MSELoss()
-        optimizer = optim.Adam(model.parameters(), lr=1e-6)
+        optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
         for epoch in range(self.student_epochs):
@@ -125,8 +125,8 @@ class FedEdServer(ServerBase):
                         selected_logits = ensemble_logits[c][idx]
 
                     merged_logits += selected_logits * self._ensemble_weight(client_nr=c, active_clients=active_clients, sample_indices=idx)
-                    if self.weight_scheme == 2:
-                        merged_logits = (merged_logits.T / torch.sum(merged_logits, axis=1)).T
+                    # if self.weight_scheme == 2:
+                    #     merged_logits = (merged_logits.T / torch.sum(merged_logits, axis=1)).T
 
                 optimizer.zero_grad()
                 output = model(x)
