@@ -52,7 +52,7 @@ class FedEdServer(ServerBase):
             ensemble_public_logits.append(local_public_logits)
             ensemble_test_logits.append(local_test_logits)
 
-        ensemble_test_acc = self._ensemble_accuracy(ensemble_test_logits) # Should be test logits
+        ensemble_test_acc = self._ensemble_accuracy(ensemble_test_logits)
         print("Ensemble test accuracy: {:.0f}%".format(ensemble_test_acc))
 
         self._save_results(local_accs, "client_accuracy")
@@ -126,7 +126,8 @@ class FedEdServer(ServerBase):
 
                     merged_logits += selected_logits * self._ensemble_weight(client_nr=c, active_clients=active_clients, sample_indices=idx)
                     if self.weight_scheme == 2:
-                        merged_logits = (merged_logits.T / torch.sum(merged_logits, axis=1)).T
+                        #merged_logits = (merged_logits.T / torch.sum(merged_logits, axis=1)).T
+                        merged_logits = F.softmax(merged_logits, dim=1)
 
                 optimizer.zero_grad()
                 output = model(x)
@@ -220,7 +221,7 @@ class FedEdServer(ServerBase):
 
         public_train_loader = DataLoader(public_train_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
         public_val_loader = DataLoader(public_val_data, batch_size=self.public_batch_size, num_workers=self.num_workers)
-        student_loader = DataLoader(StudentData(student_data), self.student_batch_size, num_workers=self.num_workers)
+        student_loader = DataLoader(StudentData(student_data), self.student_batch_size, shuffle=True, num_workers=self.num_workers)
 
         return student_loader, public_train_loader, public_val_loader
 
