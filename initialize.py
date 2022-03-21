@@ -57,8 +57,8 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", type=str, default="cifar10")
-    parser.add_argument("--model_name", type=str, default="cifar10_resnet")
+    parser.add_argument("--dataset", type=str, default="mnist")
+    parser.add_argument("--model_name", type=str, default="mnist_cnn1")
     parser.add_argument("--n_clients", type=int, default=10, help="Number of clients per round")
     parser.add_argument("--public_fraction", type=float, default=0.5)
     parser.add_argument("--distribution", type=str, default="niid")
