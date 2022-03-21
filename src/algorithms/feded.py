@@ -195,8 +195,8 @@ class FedEdServer(ServerBase):
                     sample_loss.append(torch.mean((output[j]-img_batch[j])*(output[j]-img_batch[j])))
                 test_samples_loss.extend(sample_loss)
         
-        ae_public_weights = torch.tensor([torch.exp(-((sample_loss-train_loss)/0.1)**2) for sample_loss in public_samples_loss], device=self.device)
-        ae_test_weights = torch.tensor([torch.exp(-((sample_loss-train_loss)/0.1)**2) for sample_loss in test_samples_loss], device=self.device)
+        ae_public_weights = torch.tensor([torch.exp(-((sample_loss-train_loss)/0.05)**2) for sample_loss in public_samples_loss], device=self.device)
+        ae_test_weights = torch.tensor([torch.exp(-((sample_loss-train_loss)/0.05)**2) for sample_loss in test_samples_loss], device=self.device)
 
         return ae_public_weights, ae_test_weights
 
