@@ -71,11 +71,11 @@ class Emnist_Cnn1(nn.Module):
 class Emnist_Cnn2(nn.Module):
     def __init__(self):
         super(Emnist_Cnn2, self).__init__()
-        self.conv1 = nn.Conv2d(1, 6, 5, 1, 2)
+        self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
         self.pool1 = nn.MaxPool2d(2)
-        self.conv2 = nn.Conv2d(6, 16, 5, 1, 2)
+        self.conv2 = nn.Conv2d(16, 32, 5, 1, 2)
         self.pool2 = nn.MaxPool2d(2)
-        self.fc1 = nn.Linear(16 * 7 * 7, 128)
+        self.fc1 = nn.Linear(32 * 7 * 7, 128)
         self.fc2 = nn.Linear(128, 64)
         self.fc3 = nn.Linear(64, 26)
 
