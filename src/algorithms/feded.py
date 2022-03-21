@@ -106,7 +106,7 @@ class FedEdServer(ServerBase):
         print("-- Training student model --", flush=True)
         model = create_model(self.student_model).to(self.device)
         loss_function = nn.MSELoss()
-        optimizer = optim.Adam(model.parameters(), lr=1e-4)
+        optimizer = optim.Adam(model.parameters(), lr=1e-5)
 
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
         for epoch in range(self.student_epochs):

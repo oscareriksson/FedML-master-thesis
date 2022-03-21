@@ -37,10 +37,10 @@ class Mnist_Cnn1(nn.Module):
 class Mnist_Cnn2(nn.Module):
     def __init__(self):
         super(Mnist_Cnn2, self).__init__()
-        self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
-        self.conv2 = nn.Conv2d(16, 32, 5, 1, 2)
+        self.conv1 = nn.Conv2d(1, 32, 5, 1, 2)
+        self.conv2 = nn.Conv2d(32, 64, 5, 1, 2)
         self.pool1 = nn.MaxPool2d(2)
-        self.conv3 = nn.Conv2d(32, 64, 5, 1, 2)
+        self.conv3 = nn.Conv2d(64, 64, 5, 1, 2)
         self.pool2 = nn.MaxPool2d(2)
         self.fc1 = nn.Linear(64 * 7 * 7, 128)
         self.fc2 = nn.Linear(128, 64)
