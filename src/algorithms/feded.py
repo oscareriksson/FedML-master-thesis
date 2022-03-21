@@ -25,7 +25,8 @@ class FedEdServer(ServerBase):
         self.public_data_sizes = [int(x) for x in args.public_data_sizes.split(' ')]
         self.weight_scheme = args.weight_scheme
         self.client_sample_fraction = args.client_sample_fraction
-        self.auto_weights = []
+        self.ae_public_weights = []
+        self.ae_test_weights = []
         self.autoencoder_epochs = args.autoencoder_epochs
 
     def run(self):
@@ -44,12 +45,14 @@ class FedEdServer(ServerBase):
             local_losses.extend([losses])
             local_public_logits, local_test_logits  = self._get_local_logits()
             if self.weight_scheme == 2:
-                self.auto_weights.append(self._get_autoencoder_weights(client_nr=j))
+                public_weights, test_weights = self._get_autoencoder_weights(client_nr=j)
+                self.ae_public_weights.append(public_weights)
+                self.ae_test_weights.append(test_weights)
 
             ensemble_public_logits.append(local_public_logits)
             ensemble_test_logits.append(local_test_logits)
 
-        ensemble_test_acc = self._ensemble_accuracy(ensemble_public_logits) # Should be test logits
+        ensemble_test_acc = self._ensemble_accuracy(ensemble_test_logits) # Should be test logits
         print("Ensemble test accuracy: {:.0f}%".format(ensemble_test_acc))
 
         self._save_results(local_accs, "client_accuracy")
@@ -171,6 +174,7 @@ class FedEdServer(ServerBase):
         print("")
 
         autoencoder.eval()
+
         public_samples_loss = []
         with torch.no_grad():
             for img_batch, _ in self.public_loader:
@@ -180,8 +184,21 @@ class FedEdServer(ServerBase):
                 for j in range(len(img_batch)):
                     sample_loss.append(torch.mean((output[j]-img_batch[j])*(output[j]-img_batch[j])))
                 public_samples_loss.extend(sample_loss)
-                
-        return torch.tensor([(1/sample_loss)**5 for sample_loss in public_samples_loss], device=self.device)
+        
+        test_samples_loss = []
+        with torch.no_grad():
+            for img_batch, _ in self.test_loader:
+                img_batch = img_batch.to(self.device)
+                output = autoencoder(img_batch)
+                sample_loss = []
+                for j in range(len(img_batch)):
+                    sample_loss.append(torch.mean((output[j]-img_batch[j])*(output[j]-img_batch[j])))
+                test_samples_loss.extend(sample_loss)
+        
+        ae_public_weights = torch.tensor([(1/sample_loss)**5 for sample_loss in public_samples_loss], device=self.device)
+        ae_test_weights = torch.tensor([(1/sample_loss)**5 for sample_loss in test_samples_loss], device=self.device)
+
+        return ae_public_weights, ae_test_weights
 
     def _get_student_data_loaders(self, data_size, ensemble_logits):
         """
@@ -207,7 +224,7 @@ class FedEdServer(ServerBase):
 
         return student_loader, public_train_loader, public_val_loader
 
-    def _ensemble_weight(self, client_nr, active_clients, sample_indices=None):
+    def _ensemble_weight(self, client_nr, active_clients, sample_indices=None, test=False):
         """ Weight client contributions.
 
             Parameters:
@@ -218,10 +235,11 @@ class FedEdServer(ServerBase):
         elif self.weight_scheme == 1:
             return torch.true_divide(self.label_count_matrix[client_nr], torch.sum(self.label_count_matrix[active_clients], axis=0)+0.001)
         elif self.weight_scheme == 2:
+            weights = self.ae_test_weights if test else self.ae_public_weights
             if sample_indices is None:
-                return self.auto_weights[client_nr][:, None]
+                return weights[client_nr][:, None]
             else:
-                return self.auto_weights[client_nr][sample_indices, None]
+                return weights[client_nr][sample_indices, None]
         else:
             print("Chosen weight scheme is not implemented.")
             sys.exit(0)
@@ -265,11 +283,11 @@ class FedEdServer(ServerBase):
         merged_logits = torch.zeros(ensemble_logits[0].shape, device=self.device)
 
         for c in range(self.n_clients):
-            merged_logits += ensemble_logits[c] * self._ensemble_weight(client_nr=c, active_clients=np.arange(self.n_clients))
+            merged_logits += ensemble_logits[c] * self._ensemble_weight(client_nr=c, active_clients=np.arange(self.n_clients), test=True)
         
-        targets = self.public_loader.dataset.dataset.targets[self.public_loader.dataset.indices].to(self.device)
-        #targets = self.test_loader.dataset.targets.to(self.device)
+        #targets = self.public_loader.dataset.dataset.targets[self.public_loader.dataset.indices].to(self.device)
+        targets = self.test_loader.dataset.targets.to(self.device)
         _, preds = torch.max(merged_logits, 1)
         correct = (preds == targets).sum().item()
 
-        return 100. * correct / len(self.public_loader.dataset)
+        return 100. * correct / len(self.test_loader.dataset)
