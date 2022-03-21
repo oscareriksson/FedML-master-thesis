@@ -28,6 +28,7 @@ class FedEdServer(ServerBase):
         self.ae_public_weights = []
         self.ae_test_weights = []
         self.autoencoder_epochs = args.autoencoder_epochs
+        self.student_lr = args.student_lr
 
     def run(self):
         """ Execute federated training and distillation.
@@ -106,7 +107,7 @@ class FedEdServer(ServerBase):
         print("-- Training student model --", flush=True)
         model = create_model(self.student_model).to(self.device)
         loss_function = nn.MSELoss()
-        optimizer = optim.Adam(model.parameters(), lr=1e-4)
+        optimizer = optim.Adam(model.parameters(), lr=self.student_lr)
 
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
         for epoch in range(self.student_epochs):
