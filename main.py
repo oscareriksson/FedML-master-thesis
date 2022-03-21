@@ -8,11 +8,11 @@ import numpy as np
 
 def prepare_run_folder(args):
     if args.algorithm == "feded":
-        model_names = f"{args.local_model}_{args.student_model}"
+        student_model = "_" + args.student_model.split("_")[1]
     else:
-        model_names = f"{args.local_model}"
+        student_model = ""
 
-    run_folder = f"./results/{args.dataset}/{args.algorithm}/c{args.n_clients}_{model_names}_w{args.weight_scheme}_{args.settings_id}"
+    run_folder = f"./results/{args.dataset}/{args.algorithm}/{args.settings_id}{student_model}_w{args.weight_scheme}"
     if not os.path.exists(run_folder):
         os.makedirs(run_folder)
     return run_folder
