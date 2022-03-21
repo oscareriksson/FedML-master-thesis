@@ -198,9 +198,6 @@ class FedEdServer(ServerBase):
         ae_public_weights = torch.tensor([1/(sample_loss**6) for sample_loss in public_samples_loss], device=self.device)
         ae_test_weights = torch.tensor([1/(sample_loss**6) for sample_loss in test_samples_loss], device=self.device)
 
-        # ae_public_weights /= torch.sum(ae_public_weights)
-        # ae_test_weights /= torch.sum(ae_test_weights)
-
         return ae_public_weights, ae_test_weights
 
     def _get_student_data_loaders(self, data_size, ensemble_logits):
