@@ -122,8 +122,8 @@ class FedEdServer(ServerBase):
                         selected_logits = ensemble_logits[c][idx]
 
                     merged_logits += selected_logits * self._ensemble_weight(client_nr=c, active_clients=active_clients, sample_indices=idx)
-                    if self.weight_scheme == 2:
-                        merged_logits = (merged_logits.T / torch.sum(merged_logits, axis=1)).T
+                    # if self.weight_scheme == 2:
+                    #     merged_logits = (merged_logits.T / torch.sum(merged_logits, axis=1)).T
 
                 optimizer.zero_grad()
                 output = model(x)
@@ -181,7 +181,7 @@ class FedEdServer(ServerBase):
                     sample_loss.append(torch.mean((output[j]-img_batch[j])*(output[j]-img_batch[j])))
                 public_samples_loss.extend(sample_loss)
                 
-        return torch.tensor([(1/sample_loss)**2 for sample_loss in public_samples_loss], device=self.device)
+        return torch.tensor([(1/sample_loss)**3 for sample_loss in public_samples_loss], device=self.device)
 
     def _get_student_data_loaders(self, data_size, ensemble_logits):
         """
