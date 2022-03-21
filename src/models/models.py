@@ -42,8 +42,9 @@ class Mnist_Cnn2(nn.Module):
         self.conv2 = nn.Conv2d(16, 32, 5, 1, 2)
         self.pool2 = nn.MaxPool2d(2)
         self.fc1 = nn.Linear(32 * 7 * 7, 128)
-        self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, 10)
+        self.fc2 = nn.Linear(128, 128)
+        self.drop = nn.Dropout()
+        self.fc3 = nn.Linear(128, 10)
 
     def forward(self, x):
         x = self.pool1(F.relu(self.conv1(x)))
@@ -51,6 +52,7 @@ class Mnist_Cnn2(nn.Module):
         x = torch.flatten(x, 1)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
+        x = self.drop(x)
         x = self.fc3(x)
         return x
 
