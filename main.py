@@ -132,6 +132,7 @@ if __name__ == "__main__":
     print("Dataset:                     {}".format(args.dataset))
     print("Number of clients:           {}".format(args.n_clients))
     print("Number of global rounds:     {}".format(args.n_rounds))
+    print("Settings file:                   {}".format(args.settings_file))
     print("=" * 80)
 
     main(args)
