@@ -107,7 +107,7 @@ class FedEdServer(ServerBase):
     def _train_student(self, ensemble_logits, student_loader, public_train_loader, public_val_loader, public_size):
         print("-- Training student model --", flush=True)
         model = create_model(self.student_model).to(self.device)
-        loss_function = nn.MSELoss() if self.student_loss is "mse" else nn.CrossEntropyLoss()
+        loss_function = nn.MSELoss() if self.student_loss == "mse" else nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=self.student_lr)
 
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
