@@ -1,0 +1,25 @@
+settings_file mnist_cnn1_c10_iid_qho
+algorithm fedavg
+n_rounds 100
+local_epochs 1
+mu 0.0
+train_batch_size 64
+test_batch_size 64
+learning_rate 0.001
+momentum 0.9
+num_workers 4
+student_model mnist_cnn1
+local_epochs_ensemble 1
+client_sample_fraction 0.4
+public_batch_size 64
+student_batch_size 50
+student_epochs 1
+public_data_sizes 1000 3000 5000 7000
+weight_scheme 0
+autoencoder_epochs 1
+student_lr 0.001
+dataset mnist
+local_model mnist_cnn1
+n_clients 10
+distribution iid
+settings_id qho
