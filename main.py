@@ -9,10 +9,12 @@ import numpy as np
 def prepare_run_folder(args):
     if args.algorithm == "feded":
         student_model = "_" + args.student_model.split("_")[1]
+        student_loss = "_" + args.student_loss
     else:
         student_model = ""
+        student_loss = ""
 
-    run_folder = f"./results/{args.dataset}/{args.algorithm}/{args.settings_id}{student_model}_w{args.weight_scheme}"
+    run_folder = f"./results/{args.dataset}/{args.algorithm}/{args.settings_id}{student_model}{student_loss}_w{args.weight_scheme}"
     if not os.path.exists(run_folder):
         os.makedirs(run_folder)
     return run_folder
@@ -111,6 +113,7 @@ if __name__ == "__main__":
     parser.add_argument("--weight_scheme", type=int, default=0)
     parser.add_argument("--autoencoder_epochs", type=int, default=1)
     parser.add_argument("--student_lr", type=float, default=1e-3)
+    parser.add_argument("--student_loss", type=str, default="mse")
 
 
     args = parser.parse_args()
