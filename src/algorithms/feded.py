@@ -132,8 +132,7 @@ class FedEdServer(ServerBase):
 
                 _, merged_logits = torch.max(merged_logits, 1)
                 optimizer.zero_grad()
-                #output = model(x)
-                _, output = torch.max(model(x), 1)
+                output = model(x)
                 loss = loss_function(output, merged_logits)
                 loss.backward()
                 optimizer.step()
