@@ -29,6 +29,7 @@ class FedEdServer(ServerBase):
         self.ae_test_weights = []
         self.autoencoder_epochs = args.autoencoder_epochs
         self.student_lr = args.student_lr
+        self.student_loss = args.student_loss
 
     def run(self):
         """ Execute federated training and distillation.
@@ -106,8 +107,7 @@ class FedEdServer(ServerBase):
     def _train_student(self, ensemble_logits, student_loader, public_train_loader, public_val_loader, public_size):
         print("-- Training student model --", flush=True)
         model = create_model(self.student_model).to(self.device)
-        #loss_function = nn.MSELoss()
-        loss_function = nn.CrossEntropyLoss()
+        loss_function = nn.MSELoss() if self.student_loss is "mse" else nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=self.student_lr)
 
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
@@ -127,10 +127,10 @@ class FedEdServer(ServerBase):
                         selected_logits = ensemble_logits[c][idx]
 
                     merged_logits += selected_logits * self._ensemble_weight(client_nr=c, active_clients=active_clients, sample_indices=idx)
-                    # if self.weight_scheme == 2:
-                    #     merged_logits = (merged_logits.T / torch.amax(merged_logits, dim=1)).T
 
-                _, merged_logits = torch.max(merged_logits, 1)
+                    if self.student_loss == "ce":
+                        _, merged_logits = torch.max(merged_logits, 1)
+
                 optimizer.zero_grad()
                 output = model(x)
                 loss = loss_function(output, merged_logits)
