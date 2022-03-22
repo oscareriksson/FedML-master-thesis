@@ -128,8 +128,8 @@ class FedEdServer(ServerBase):
 
                     merged_logits += selected_logits * self._ensemble_weight(client_nr=c, active_clients=active_clients, sample_indices=idx)
 
-                    if self.student_loss == "ce":
-                        _, merged_logits = torch.max(merged_logits, 1)
+                if self.student_loss == "ce":
+                    _, merged_logits = torch.max(merged_logits, 1)
 
                 optimizer.zero_grad()
                 output = model(x)
