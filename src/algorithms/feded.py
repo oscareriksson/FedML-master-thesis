@@ -106,7 +106,8 @@ class FedEdServer(ServerBase):
     def _train_student(self, ensemble_logits, student_loader, public_train_loader, public_val_loader, public_size):
         print("-- Training student model --", flush=True)
         model = create_model(self.student_model).to(self.device)
-        loss_function = nn.MSELoss()
+        #loss_function = nn.MSELoss()
+        loss_function = nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=self.student_lr)
 
         train_accs, train_losses, val_accs, val_losses = [], [], [], []
@@ -129,8 +130,10 @@ class FedEdServer(ServerBase):
                     if self.weight_scheme == 2:
                         merged_logits = (merged_logits.T / torch.amax(merged_logits, dim=1)).T
 
+                _, merged_logits = torch.max(merged_logits, 1)
                 optimizer.zero_grad()
-                output = model(x)
+                #output = model(x)
+                _, output = torch.max(model(x), 1)
                 loss = loss_function(output, merged_logits)
                 loss.backward()
                 optimizer.step()
