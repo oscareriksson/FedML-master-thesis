@@ -127,8 +127,8 @@ class FedEdServer(ServerBase):
                         selected_logits = ensemble_logits[c][idx]
 
                     merged_logits += selected_logits * self._ensemble_weight(client_nr=c, active_clients=active_clients, sample_indices=idx)
-                    if self.weight_scheme == 2:
-                        merged_logits = (merged_logits.T / torch.amax(merged_logits, dim=1)).T
+                    # if self.weight_scheme == 2:
+                    #     merged_logits = (merged_logits.T / torch.amax(merged_logits, dim=1)).T
 
                 _, merged_logits = torch.max(merged_logits, 1)
                 optimizer.zero_grad()
