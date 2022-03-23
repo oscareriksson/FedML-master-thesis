@@ -170,7 +170,7 @@ class Cifar10_Autoencoder(nn.Module):
         
         ### Convolutional section
         self.encoder_cnn = nn.Sequential(
-            nn.Conv2d(1, 8, 3, stride=2, padding=1),
+            nn.Conv2d(3, 8, 3, stride=2, padding=1),
             nn.ReLU(True),
             nn.Conv2d(8, 16, 3, stride=2, padding=1),
             nn.BatchNorm2d(16),
