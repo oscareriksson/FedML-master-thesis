@@ -204,7 +204,7 @@ class Cifar10_Autoencoder(nn.Module):
             nn.BatchNorm2d(16),
             nn.ReLU(True),
             nn.ConvTranspose2d(16, 8, 4, stride=2, 
-            padding=1, padding=1),
+            padding=1),
             nn.BatchNorm2d(8),
             nn.ReLU(True),
             nn.ConvTranspose2d(8, 3, 4, stride=2, 
