@@ -16,9 +16,9 @@ def create_model(model_name):
     elif model_name == "cifar10_resnet":
         return Cifar10_Resnet()
     elif model_name == "mnist_autoencoder" or model_name == "emnist_autoencoder":
-        return Autoencoder(1)
+        return Mnist_Autoencoder()
     elif model_name == "cifar10_autoencoder":
-        return Autoencoder(3)
+        return Cifar10_Autoencoder()
     else:
         print("Model name is not supported.")
         sys.exit()
@@ -106,13 +106,13 @@ class Cifar10_Resnet(nn.Module):
         return self.final(x)
 
 
-class Autoencoder(nn.Module):
-    def __init__(self, input_channels):
+class Mnist_Autoencoder(nn.Module):
+    def __init__(self):
         super().__init__()
         
         ### Convolutional section
         self.encoder_cnn = nn.Sequential(
-            nn.Conv2d(input_channels, 8, 3, stride=2, padding=1),
+            nn.Conv2d(1, 8, 3, stride=2, padding=1),
             nn.ReLU(True),
             nn.Conv2d(8, 16, 3, stride=2, padding=1),
             nn.BatchNorm2d(16),
@@ -151,6 +151,64 @@ class Autoencoder(nn.Module):
             nn.ReLU(True),
             nn.ConvTranspose2d(8, 1, 3, stride=2, 
             padding=1, output_padding=1)
+        )
+        
+    def forward(self, x):
+        x = self.encoder_cnn(x)
+        x = self.flatten(x)
+        x = self.encoder_lin(x)
+        x = self.decoder_lin(x)
+        x = self.unflatten(x)
+        x = self.decoder_conv(x)
+        x = torch.sigmoid(x)
+        return x
+
+
+class Cifar10_Autoencoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+        
+        ### Convolutional section
+        self.encoder_cnn = nn.Sequential(
+            nn.Conv2d(1, 8, 3, stride=2, padding=1),
+            nn.ReLU(True),
+            nn.Conv2d(8, 16, 3, stride=2, padding=1),
+            nn.BatchNorm2d(16),
+            nn.ReLU(True),
+            nn.Conv2d(16, 32, 3, stride=2, padding=0),
+            nn.ReLU(True)
+        )
+        
+        ### Flatten layer
+        self.flatten = nn.Flatten(start_dim=1)
+        ### Linear section
+        self.encoder_lin = nn.Sequential(
+            nn.Linear(3 * 3 * 32, 128),
+            nn.ReLU(True),
+            nn.Linear(128, 4)
+        )
+        
+        self.decoder_lin = nn.Sequential(
+            nn.Linear(4, 128),
+            nn.ReLU(True),
+            nn.Linear(128, 4 * 4 * 32),
+            nn.ReLU(True)
+        )
+        
+        self.unflatten = nn.Unflatten(dim=1, 
+        unflattened_size=(32, 4, 4))
+
+        self.decoder_conv = nn.Sequential(
+            nn.ConvTranspose2d(32, 16, 4, 
+            stride=2, padding=1),
+            nn.BatchNorm2d(16),
+            nn.ReLU(True),
+            nn.ConvTranspose2d(16, 8, 4, stride=2, 
+            padding=1, padding=1),
+            nn.BatchNorm2d(8),
+            nn.ReLU(True),
+            nn.ConvTranspose2d(8, 3, 4, stride=2, 
+            padding=1)
         )
         
     def forward(self, x):
