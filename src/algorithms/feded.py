@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from ..models.models import Autoencoder, create_model
+from ..models.models import create_model
 from ..datasets.dataset_student import StudentData
 import numpy as np
 import sys
