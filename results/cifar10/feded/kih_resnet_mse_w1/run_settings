@@ -1,4 +1,4 @@
-settings_file cifar10_resnet_c10_niid0.1_sgk
+settings_file cifar10_resnet_c10_niid0.1_kih
 algorithm feded
 n_rounds 1
 local_epochs 1
@@ -23,4 +23,4 @@ dataset cifar10
 local_model cifar10_resnet
 n_clients 10
 distribution niid0.1
-settings_id sgk
+settings_id kih

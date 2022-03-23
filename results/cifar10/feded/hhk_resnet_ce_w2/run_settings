@@ -1,4 +1,4 @@
-settings_file cifar10_resnet_c10_niid0.1_sgk
+settings_file cifar10_resnet_c10_niid0.1_hhk
 algorithm feded
 n_rounds 1
 local_epochs 1
@@ -13,14 +13,14 @@ local_epochs_ensemble 50
 client_sample_fraction 0.8
 public_batch_size 64
 student_batch_size 50
-student_epochs 15
+student_epochs 100
 public_data_sizes 500 1000 5000 10000 25000
-weight_scheme 1
-autoencoder_epochs 1
-student_lr 0.001
-student_loss mse
+weight_scheme 2
+autoencoder_epochs 30
+student_lr 1e-05
+student_loss ce
 dataset cifar10
 local_model cifar10_resnet
 n_clients 10
 distribution niid0.1
-settings_id sgk
+settings_id hhk
