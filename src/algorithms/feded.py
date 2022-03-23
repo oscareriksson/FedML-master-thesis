@@ -122,7 +122,7 @@ class FedEdServer(ServerBase):
                 for c in active_clients:
                     if len(idx) != self.student_batch_size:
                         selected_logits = torch.zeros(self.student_batch_size, self.n_classes, device=self.device)
-                        selected_logits[:len(idx), self.n_classes] = ensemble_logits[c][idx]
+                        selected_logits[:len(idx), self.n_classes-1] = ensemble_logits[c][idx]
                     else:
                         selected_logits = ensemble_logits[c][idx]
 
