@@ -1,4 +1,4 @@
-settings_file cifar10_resnet_c10_iid_vvr
+settings_file cifar10_resnet_c10_iid_xsf
 algorithm feded
 n_rounds 1
 local_epochs 1
@@ -23,4 +23,4 @@ dataset cifar10
 local_model cifar10_resnet
 n_clients 10
 distribution iid
-settings_id vvr
+settings_id xsf
