@@ -154,7 +154,7 @@ class FedEdServer(ServerBase):
     def _get_autoencoder_weights(self, client_nr):
         """
         """
-        autoencoder = create_model("autoencoder").to(self.device)
+        autoencoder = create_model(self.dataset_name + "_autoencoder").to(self.device)
         optimizer = torch.optim.Adam(autoencoder.parameters(), lr=0.001, weight_decay=1e-05)
         loss_fn = nn.MSELoss()
 

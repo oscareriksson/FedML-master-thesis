@@ -15,8 +15,10 @@ def create_model(model_name):
         return Emnist_Cnn2()
     elif model_name == "cifar10_resnet":
         return Cifar10_Resnet()
-    elif model_name == "autoencoder":
+    elif model_name == "mnist_autoencoder" or model_name == "emnist_autoencoder":
         return Autoencoder(1)
+    elif model_name == "cifar10_autoencoder":
+        return Autoencoder(3)
     else:
         print("Model name is not supported.")
         sys.exit()
