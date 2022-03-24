@@ -130,6 +130,8 @@ class FedEdServer(ServerBase):
 
                 if self.student_loss == "ce":
                     _, merged_logits = torch.max(merged_logits, 1)
+                elif self.weight_scheme == 2:
+                    merged_logits = (merged_logits.T / torch.sum(merged_logits, 1)).T
 
                 optimizer.zero_grad()
                 output = model(x)
