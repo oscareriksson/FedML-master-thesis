@@ -3,7 +3,7 @@ algorithm fedavg
 n_rounds 100
 local_epochs 1
 mu 0.0
-train_batch_size 64
+train_batch_size 80
 test_batch_size 64
 learning_rate 0.001
 momentum 0.9
