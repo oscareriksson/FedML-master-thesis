@@ -200,8 +200,8 @@ class FedEdServer(ServerBase):
                     sample_loss.append(torch.mean((output[j]-img_batch[j])*(output[j]-img_batch[j])))
                 test_samples_loss.extend(sample_loss)
         
-        ae_public_weights = torch.tensor([(train_loss/sample_loss)**2 for sample_loss in public_samples_loss], device=self.device)
-        ae_test_weights = torch.tensor([(train_loss/sample_loss)**2 for sample_loss in test_samples_loss], device=self.device)
+        ae_public_weights = torch.tensor([train_loss/sample_loss for sample_loss in public_samples_loss], device=self.device)
+        ae_test_weights = torch.tensor([train_loss/sample_loss for sample_loss in test_samples_loss], device=self.device)
 
         return ae_public_weights, ae_test_weights
 
@@ -242,9 +242,9 @@ class FedEdServer(ServerBase):
         elif self.weight_scheme == 2:
             weights = self.ae_test_weights if test else self.ae_public_weights
             if sample_indices is None:
-                return weights[client_nr][:, None]
+                return weights[client_nr][:, None] * self.n_samples_client[client_nr] / sum([self.n_samples_client[c] for c in active_clients])
             else:
-                return weights[client_nr][sample_indices, None]
+                return weights[client_nr][sample_indices, None] * self.n_samples_client[client_nr] / sum([self.n_samples_client[c] for c in active_clients])
         else:
             print("Chosen weight scheme is not implemented.")
             sys.exit(0)
