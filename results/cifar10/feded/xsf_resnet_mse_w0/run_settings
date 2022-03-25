@@ -13,7 +13,7 @@ local_epochs_ensemble 20
 client_sample_fraction 0.8
 public_batch_size 64
 student_batch_size 50
-student_epochs 15
+student_epochs 10
 public_data_sizes 500 1000 5000 10000 25000
 weight_scheme 0
 autoencoder_epochs 1
