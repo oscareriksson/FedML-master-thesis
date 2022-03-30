@@ -10,7 +10,8 @@ import random
 
 def prepare_settings_folder(path_name):
     while True:
-        settings_folder = f"{path_name}_{''.join(random.choice(string.ascii_lowercase) for _ in range(3))}"
+        #settings_folder = f"{path_name}_{''.join(random.choice(string.ascii_lowercase) for _ in range(3))}"
+        settings_folder = path_name
         if not os.path.exists(settings_folder):
             os.makedirs(settings_folder)
             break
@@ -31,12 +32,16 @@ def initialize_data(args):
 
 
 def main(args):
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+    random.seed(args.seed)
+
     if args.distribution == "niid":
         distribution = "niid" + str(args.alpha)
     else:
         distribution = "iid"
 
-    path_name = f"./settings/{args.model_name}_c{args.n_clients}_{distribution}"
+    path_name = f"./settings/{args.model_name}_c{args.n_clients}_{distribution}_s{args.seed}"
 
     settings_folder = prepare_settings_folder(path_name)
     
@@ -57,12 +62,13 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", type=str, default="cifar10")
-    parser.add_argument("--model_name", type=str, default="cifar10_resnet")
+    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--dataset", type=str, default="mnist")
+    parser.add_argument("--model_name", type=str, default="mnist_cnn1")
     parser.add_argument("--n_clients", type=int, default=10, help="Number of clients per round")
     parser.add_argument("--public_fraction", type=float, default=0.5)
-    parser.add_argument("--distribution", type=str, default="iid")
-    parser.add_argument("--alpha", type=float, default=0.1)
+    parser.add_argument("--distribution", type=str, default="niid")
+    parser.add_argument("--alpha", type=float, default=10)
 
     args = parser.parse_args()
 
