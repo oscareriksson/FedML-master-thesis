@@ -11,3 +11,4 @@ for a in "${alpha[@]}"
             python3 initialize.py --seed $s --dataset mnist --model_name mnist_cnn1 --n_clients 20 --alpha $a
         done
     done
+

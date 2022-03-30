@@ -69,7 +69,7 @@ def main(args):
     save_run_settings(args, run_folder)
 
     settings_path = f"./settings/{args.settings_file}"
-    model = torch.load(f"{settings_path}model")
+    model = torch.load(f"{settings_path}/model")
     
     local_indices = []
     with open(f'{settings_path}/data_splits.npy', 'rb') as f:
