@@ -8,6 +8,10 @@ do
     settings+=$set
 done
 
+for set in $settings
+do
+    echo "$set \n"
+done
 # n_rounds=100
 # local_epochs_ensemble=20
 # student_epochs=30
