@@ -3,16 +3,12 @@
 paths=./settings/mnist*/
 settings=()
 for path in $paths
-do
+do  
     set=${path%*/}
     set=${set//"./settings/"}
     settings+=($set)
 done
 
-for set in $settings
-do
-    echo "$set \n"
-done
 # n_rounds=100
 # local_epochs_ensemble=20
 # student_epochs=30
@@ -31,19 +27,19 @@ student_models=("mnist_cnn1" "mnist_cnn2" "mnist_cnn3")
 loss_functions=("mse" "ce")
 
 # FEDAVG
-for set in $settings
+for set in ${settings[@]}
 do  
     python3 main.py --settings_file $set --algorithm fedavg --local_epochs 1 --n_rounds $n_rounds
 done
 
 # FEDPROX
-for set in $settings
+for set in ${settings[@]}
 do  
     python3 main.py --settings_file $set --algorithm fedprox --local_epochs 1 --n_rounds $n_rounds
 done
 
 # FEDED, different student models
-for set in $settings
+for set in ${settings[@]}
 do  
     for model in $student_models
     do
@@ -52,7 +48,7 @@ do
 done
 
 # FEDED, w1
-for set in $settings
+for set in ${settings[@]}
 do  
     for model in $student_models
     do
@@ -61,7 +57,7 @@ do
 done
 
 # FEDED, w2
-for set in $settings
+for set in ${settings[@]}
 do  
     for model in $student_models
     do
