@@ -68,7 +68,7 @@ def main(args):
     run_folder = prepare_run_folder(args)
     save_run_settings(args, run_folder)
 
-    settings_path = f"./settings/{args.settings_file}"
+    settings_path = args.settings_file
     model = torch.load(f"{settings_path}/model")
     
     local_indices = []
