@@ -9,6 +9,8 @@ def create_model(model_name):
         return Mnist_Cnn1()
     elif model_name == "mnist_cnn2":
         return Mnist_Cnn2()
+    elif model_name == "mnist_cnn3":
+        return Mnist_Cnn2()
     elif model_name == "emnist_cnn1":
         return Emnist_Cnn1()
     elif model_name == "emnist_cnn2":
@@ -39,6 +41,19 @@ class Mnist_Cnn1(nn.Module):
 class Mnist_Cnn2(nn.Module):
     def __init__(self):
         super(Mnist_Cnn2, self).__init__()
+        self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
+        self.pool = nn.MaxPool2d(4)
+        self.fc1 = nn.Linear(16 * 7 * 7, 10)
+
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = torch.flatten(x, 1)
+        x = self.fc1(x)
+        return x
+
+class Mnist_Cnn3(nn.Module):
+    def __init__(self):
+        super(Mnist_Cnn3, self).__init__()
         self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
         self.conv2 = nn.Conv2d(16, 32, 5, 1, 2)
         self.fc1 = nn.Linear(32 * 7 * 7, 128)
