@@ -14,7 +14,7 @@ def prepare_run_folder(args):
         student_model = ""
         student_loss = ""
 
-    run_folder = f"./results/{args.dataset}/{args.algorithm}/{args.settings_id}{student_model}{student_loss}_w{args.weight_scheme}"
+    run_folder = f"./results/{args.dataset}/{args.algorithm}/{args.seed}{student_model}{student_loss}_w{args.weight_scheme}"
     if not os.path.exists(run_folder):
         os.makedirs(run_folder)
     return run_folder
@@ -69,7 +69,7 @@ def main(args):
     save_run_settings(args, run_folder)
 
     settings_path = f"./settings/{args.settings_file}"
-    model = torch.load(f"{settings_path}/model")
+    model = torch.load(f"{settings_path}model")
     
     local_indices = []
     with open(f'{settings_path}/data_splits.npy', 'rb') as f:
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     dargs['local_model'] = init_data[0] + "_" + init_data[1]
     dargs['n_clients'] = int(init_data[2][1:])
     dargs['distribution'] = init_data[3]
-    dargs['settings_id'] = init_data[4]
+    dargs['seed'] = int(init_data[4][1:])
 
     print("=" * 80)
     print("Summary of training process:")
