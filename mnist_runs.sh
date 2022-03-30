@@ -1,6 +1,13 @@
 #!/bin/bash
 
-settings=./settings/mnist*/
+paths=./settings/mnist*/
+settings=()
+for path in $paths
+do
+    set=${path%*/}
+    settings+=$set
+done
+
 # n_rounds=100
 # local_epochs_ensemble=20
 # student_epochs=30
