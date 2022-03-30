@@ -5,6 +5,7 @@ settings=()
 for path in $paths
 do
     set=${path%*/}
+    set=${set//"./settings/"}
     settings+=($set)
 done
 
