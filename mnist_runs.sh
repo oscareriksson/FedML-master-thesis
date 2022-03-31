@@ -27,16 +27,16 @@ student_models=("mnist_cnn1" "mnist_cnn2" "mnist_cnn3")
 loss_functions=("mse" "ce")
 
 # FEDAVG
-for set in ${settings[@]}
-do  
-    python3 main.py --settings_file $set --algorithm fedavg --local_epochs 1 --n_rounds $n_rounds
-done
+# for set in ${settings[@]}
+# do  
+#     python3 main.py --settings_file $set --algorithm fedavg --local_epochs 1 --n_rounds $n_rounds
+# done
 
-# FEDPROX
-for set in ${settings[@]}
-do  
-    python3 main.py --settings_file $set --algorithm fedprox --local_epochs 1 --n_rounds $n_rounds
-done
+# # FEDPROX
+# for set in ${settings[@]}
+# do  
+#     python3 main.py --settings_file $set --algorithm fedprox --local_epochs 1 --n_rounds $n_rounds
+# done
 
 # FEDED, different student models
 for set in ${settings[@]}
