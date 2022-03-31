@@ -9,34 +9,34 @@ do
     settings+=($set)
 done
 
-# n_rounds=100
-# local_epochs_ensemble=20
-# student_epochs=30
-# student_epochs_w2=100
-# autoencoder_epochs=30
-# public_data_sizes="500 1000 5000 15000 30000"
+n_rounds=100
+local_epochs_ensemble=20
+student_epochs=30
+student_epochs_w2=100
+autoencoder_epochs=30
+public_data_sizes="500 1000 5000 15000 30000"
 
-n_rounds=1
-local_epochs_ensemble=1
-student_epochs=1
-student_epochs_w2=1
-autoencoder_epochs=1
-public_data_sizes="500 1000"
+# n_rounds=1
+# local_epochs_ensemble=1
+# student_epochs=1
+# student_epochs_w2=1
+# autoencoder_epochs=1
+# public_data_sizes="500 1000"
 
-student_models=("mnist_cnn1" "mnist_cnn2" "mnist_cnn3")
-loss_functions=("mse" "ce")
+# student_models=("mnist_cnn1" "mnist_cnn2" "mnist_cnn3")
+# loss_functions=("mse" "ce")
 
-# FEDAVG
-# for set in ${settings[@]}
-# do  
-#     python3 main.py --settings_file $set --algorithm fedavg --local_epochs 1 --n_rounds $n_rounds
-# done
+FEDAVG
+for set in ${settings[@]}
+do  
+    python3 main.py --settings_file $set --algorithm fedavg --local_epochs 1 --n_rounds $n_rounds
+done
 
-# # FEDPROX
-# for set in ${settings[@]}
-# do  
-#     python3 main.py --settings_file $set --algorithm fedprox --local_epochs 1 --n_rounds $n_rounds
-# done
+# FEDPROX
+for set in ${settings[@]}
+do  
+    python3 main.py --settings_file $set --algorithm fedprox --local_epochs 1 --n_rounds $n_rounds
+done
 
 # FEDED, different student models
 for set in ${settings[@]}
