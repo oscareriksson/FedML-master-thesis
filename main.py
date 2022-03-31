@@ -14,7 +14,7 @@ def prepare_run_folder(args):
         student_model = ""
         student_loss = ""
 
-    run_folder = f"./results/{args.dataset}/{args.algorithm}/s{args.settings_file}{student_model}{student_loss}_w{args.weight_scheme}"
+    run_folder = f"./results/{args.dataset}/{args.algorithm}/{args.settings_file}{student_model}{student_loss}_w{args.weight_scheme}"
     if not os.path.exists(run_folder):
         os.makedirs(run_folder)
     return run_folder
