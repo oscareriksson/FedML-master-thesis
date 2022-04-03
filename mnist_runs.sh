@@ -27,16 +27,16 @@ public_data_sizes="500 1000 5000 15000 30000"
 # loss_functions=("mse" "ce")
 
 # FEDAVG
-for set in ${settings[@]}
-do  
-    python3 main.py --settings_file $set --algorithm fedavg --local_epochs 1 --n_rounds $n_rounds
-done
+# for set in ${settings[@]}
+# do  
+#     python3 main.py --settings_file $set --algorithm fedavg --local_epochs 1 --n_rounds $n_rounds
+# done
 
-# FEDPROX
-for set in ${settings[@]}
-do  
-    python3 main.py --settings_file $set --algorithm fedprox --local_epochs 1 --n_rounds $n_rounds
-done
+# # FEDPROX
+# for set in ${settings[@]}
+# do  
+#     python3 main.py --settings_file $set --algorithm fedprox --local_epochs 1 --n_rounds $n_rounds
+# done
 
 # FEDED, different student models
 for set in ${settings[@]}
