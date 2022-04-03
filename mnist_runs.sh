@@ -38,8 +38,9 @@ public_data_sizes="500 1000 5000 15000 30000"
 #     python3 main.py --settings_file $set --algorithm fedprox --local_epochs 1 --n_rounds $n_rounds
 # done
 
-# FEDED, different student models
+# FEDED
 for set in ${settings[@]}
+echo "$set"
 do  
     for model in ${student_models[@]}
     do
