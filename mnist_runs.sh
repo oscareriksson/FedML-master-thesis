@@ -23,8 +23,8 @@ public_data_sizes="500 1000 5000 15000 30000"
 # autoencoder_epochs=1
 # public_data_sizes="500 1000"
 
-# student_models=("mnist_cnn1" "mnist_cnn2" "mnist_cnn3")
-# loss_functions=("mse" "ce")
+student_models=("mnist_cnn1" "mnist_cnn2" "mnist_cnn3")
+loss_functions=("mse" "ce")
 
 # FEDAVG
 # for set in ${settings[@]}
@@ -41,7 +41,6 @@ public_data_sizes="500 1000 5000 15000 30000"
 # FEDED
 for set in ${settings[@]}
 do  
-echo "$set"
     for model in ${student_models[@]}
     do
         python3 main.py --settings_file $set --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model $model --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs --weight_scheme 0
