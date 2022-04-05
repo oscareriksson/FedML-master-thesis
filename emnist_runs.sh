@@ -1,6 +1,6 @@
 #!/bin/bash
 
-paths=./settings/emnist*/
+paths=./settings/emnist_cnn1_c10_niid10.0_s5*/
 settings=()
 for path in $paths
 do  
@@ -9,19 +9,19 @@ do
     settings+=($set)
 done
 
-n_rounds=100
-local_epochs_ensemble=50
-student_epochs=30
-student_epochs_w2=100
-autoencoder_epochs=30
-public_data_sizes="500 1000 5000 30000 60000"
+# n_rounds=100
+# local_epochs_ensemble=50
+# student_epochs=30
+# student_epochs_w2=100
+# autoencoder_epochs=30
+# public_data_sizes="500 1000 5000 30000 60000"
 
-# n_rounds=1
-# local_epochs_ensemble=1
-# student_epochs=1
-# student_epochs_w2=1
-# autoencoder_epochs=1
-# public_data_sizes="500 1000"
+n_rounds=1
+local_epochs_ensemble=1
+student_epochs=1
+student_epochs_w2=1
+autoencoder_epochs=1
+public_data_sizes="500 1000"
 
 student_models=("emnist_cnn1" "emnist_cnn2" "emnist_cnn3")
 loss_functions=("mse" "ce")
