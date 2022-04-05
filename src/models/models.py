@@ -15,6 +15,8 @@ def create_model(model_name):
         return Emnist_Cnn1()
     elif model_name == "emnist_cnn2":
         return Emnist_Cnn2()
+    elif model_name == "emnist_cnn3":
+        return Emnist_Cnn3()
     elif model_name == "cifar10_resnet":
         return Cifar10_Resnet()
     elif model_name == "mnist_autoencoder" or model_name == "emnist_autoencoder":
@@ -88,6 +90,19 @@ class Emnist_Cnn1(nn.Module):
 class Emnist_Cnn2(nn.Module):
     def __init__(self):
         super(Emnist_Cnn2, self).__init__()
+        self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
+        self.pool = nn.MaxPool2d(4)
+        self.fc1 = nn.Linear(16 * 7 * 7, 26)
+
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = torch.flatten(x, 1)
+        x = self.fc1(x)
+        return x
+
+class Emnist_Cnn3(nn.Module):
+    def __init__(self):
+        super(Emnist_Cnn3, self).__init__()
         self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
         self.pool1 = nn.MaxPool2d(2)
         self.conv2 = nn.Conv2d(16, 32, 5, 1, 2)

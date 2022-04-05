@@ -4,6 +4,7 @@ import sys
 import os
 import torch
 import numpy as np
+import random
 
 
 def prepare_run_folder(args):
@@ -64,6 +65,9 @@ def create_server(args, model, client_loaders, test_loader, public_loader, run_f
 
 
 def main(args):
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+    random.seed(args.seed)
 
     run_folder = prepare_run_folder(args)
     save_run_settings(args, run_folder)
