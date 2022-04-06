@@ -68,7 +68,10 @@ loss_functions=("mse" "ce")
 #     done
 # done
 
-for set in ${settings[@]}
-do  
-    python3 main.py --settings_file $set --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model mnist_cnn2 --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs_w2 --student_loss ce --weight_scheme 2 --autoencoder_epochs $autoencoder_epochs --student_lr 0.00001 
-done
+# for set in ${settings[@]}
+# do  
+#     python3 main.py --settings_file $set --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model mnist_cnn2 --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs_w2 --student_loss ce --weight_scheme 2 --autoencoder_epochs $autoencoder_epochs --student_lr 0.00001 
+# done
+
+python3 main.py --settings_file mnist_cnn1_c10_niid10.0_s4 --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model mnist_cnn2 --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs_w2 --student_loss ce --weight_scheme 2 --autoencoder_epochs $autoencoder_epochs --student_lr 0.00001
+python3 main.py --settings_file mnist_cnn1_c10_niid10.0_s5 --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model mnist_cnn2 --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs_w2 --student_loss ce --weight_scheme 2 --autoencoder_epochs $autoencoder_epochs --student_lr 0.00001
