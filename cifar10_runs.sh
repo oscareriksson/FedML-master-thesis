@@ -1,43 +1,66 @@
-#!/bin/sh
+#!/bin/bash
 
-# python3 main.py --settings_file cifar10_resnet_c10_iid_qre --algorithm fedavg --local_epochs 1 --n_rounds 100
-# python3 main.py --settings_file cifar10_resnet_c10_iid_vvr --algorithm fedavg --local_epochs 1 --n_rounds 100
-# python3 main.py --settings_file cifar10_resnet_c10_iid_yzu --algorithm fedavg --local_epochs 1 --n_rounds 100
-# python3 main.py --settings_file cifar10_resnet_c10_iid_dpp --algorithm fedavg --local_epochs 1 --n_rounds 100
-# python3 main.py --settings_file cifar10_resnet_c10_iid_xsf --algorithm fedavg --local_epochs 1 --n_rounds 100
+paths=./settings/cifar10*/
+settings=()
+for path in $paths
+do  
+    set=${path%*/}
+    set=${set//"./settings/"}
+    settings+=($set)
+done
 
-# python3 main.py --settings_file cifar10_resnet_c10_niid0.1_got --algorithm fedavg --local_epochs 1 --n_rounds 100 --train_batch_size 80
-# python3 main.py --settings_file cifar10_resnet_c10_niid0.1_hhk --algorithm fedavg --local_epochs 1 --n_rounds 100 --train_batch_size 80
-# python3 main.py --settings_file cifar10_resnet_c10_niid0.1_zkc --algorithm fedavg --local_epochs 1 --n_rounds 100 --train_batch_size 80
-# python3 main.py --settings_file cifar10_resnet_c10_niid0.1_kih --algorithm fedavg --local_epochs 1 --n_rounds 100 --train_batch_size 80
-# python3 main.py --settings_file cifar10_resnet_c10_niid0.1_sgk --algorithm fedavg --local_epochs 1 --n_rounds 100 --train_batch_size 80
+n_rounds=100
+local_epochs_ensemble=20
+student_epochs=30
+student_epochs_w2=100
+autoencoder_epochs=50
+public_data_sizes="500 1000 5000 10000 25000"
 
-# python3 main.py --settings_file cifar10_resnet_c10_iid_qre --algorithm feded --local_epochs_ensemble 20 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 0 --train_batch_size 80
-# python3 main.py --settings_file cifar10_resnet_c10_iid_vvr --algorithm feded --local_epochs_ensemble 20 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 0 --train_batch_size 80
-# python3 main.py --settings_file cifar10_resnet_c10_iid_yzu --algorithm feded --local_epochs_ensemble 20 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 0 --train_batch_size 80
-# python3 main.py --settings_file cifar10_resnet_c10_iid_dpp --algorithm feded --local_epochs_ensemble 20 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 0 --train_batch_size 80
-# python3 main.py --settings_file cifar10_resnet_c10_iid_xsf --algorithm feded --local_epochs_ensemble 20 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 0 --train_batch_size 80
+# n_rounds=1
+# local_epochs_ensemble=1
+# student_epochs=1
+# student_epochs_w2=1
+# autoencoder_epochs=1
+# public_data_sizes="500 1000"
 
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_got --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 0 --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_hhk --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 0 --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_zkc --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 0 --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_kih --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 0 --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_sgk --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 0 --train_batch_size 80
+student_models=("cifar10_resnet18" "cifar10_resnet34")
+loss_functions=("mse" "ce")
 
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_got --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 1 --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_hhk --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 1 --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_zkc --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 1 --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_kih --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 1 --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_sgk --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 1 --train_batch_size 80
+# FEDAVG
+for set in ${settings[@]}
+do  
+    python3 main.py --settings_file $set --algorithm fedavg --local_epochs 1 --n_rounds $n_rounds --train_batch_size 80
+done
 
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_got --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 2 --autoencoder_epochs 100 --student_loss ce --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_hhk --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 2 --autoencoder_epochs 100 --student_loss ce --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_zkc --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 2 --autoencoder_epochs 100 --student_loss ce --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_kih --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 2 --autoencoder_epochs 100 --student_loss ce --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_sgk --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 2 --autoencoder_epochs 100 --student_loss ce --train_batch_size 80
+# FEDPROX
+for set in ${settings[@]}
+do  
+    python3 main.py --settings_file $set --algorithm fedprox --mu 0.01 --local_epochs 1 --n_rounds $n_rounds --train_batch_size 80
+done
 
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_got --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 2 --autoencoder_epochs 100 --student_loss mse --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_hhk --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 2 --autoencoder_epochs 100 --student_loss mse --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_zkc --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 2 --autoencoder_epochs 100 --student_loss mse --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_kih --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 2 --autoencoder_epochs 100 --student_loss mse --train_batch_size 80
-python3 main.py --settings_file cifar10_resnet_c10_niid0.1_sgk --algorithm feded --local_epochs_ensemble 5 --student_model cifar10_resnet --public_data_sizes="500 1000 5000 10000 25000" --client_sample_fraction 0.8 --student_epochs 10 --weight_scheme 2 --autoencoder_epochs 100 --student_loss mse --train_batch_size 80
+# FEDED
+for set in ${settings[@]}
+do  
+    for model in ${student_models[@]}
+    do
+        python3 main.py --settings_file $set --algorithm feded --train_batch_size 80 --local_epochs_ensemble $local_epochs_ensemble --student_model $model --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs --weight_scheme 0
+    done
+done
+
+# FEDED, w1
+for set in ${settings[@]}
+do  
+    for model in ${student_models[@]}
+    do
+        python3 main.py --settings_file $set --algorithm feded --train_batch_size 80 --local_epochs_ensemble $local_epochs_ensemble --student_model $model --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs --weight_scheme 1
+    done
+done
+
+# FEDED, w2
+for set in ${settings[@]}
+do  
+    for model in ${student_models[@]}
+    do
+        python3 main.py --settings_file $set --algorithm feded --train_batch_size 80 --local_epochs_ensemble $local_epochs_ensemble --student_model $model --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs --weight_scheme 2 --student_loss ce --autoencoder_epochs $autoencoder_epochs
+    done
+done

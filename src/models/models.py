@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import sys
-from torchvision.models import resnet18
+from torchvision.models import resnet18, resnet34
 
 def create_model(model_name):
     if model_name == "mnist_cnn1":
@@ -17,8 +17,10 @@ def create_model(model_name):
         return Emnist_Cnn2()
     elif model_name == "emnist_cnn3":
         return Emnist_Cnn3()
-    elif model_name == "cifar10_resnet":
-        return Cifar10_Resnet()
+    elif model_name == "cifar10_resnet18":
+        return Cifar10_Resnet18()
+    elif model_name == "cifar10_resnet34":
+        return Cifar10_Resnet34()
     elif model_name == "mnist_autoencoder" or model_name == "emnist_autoencoder":
         return Mnist_Autoencoder()
     elif model_name == "cifar10_autoencoder":
@@ -141,10 +143,24 @@ class Cifar10_Cnn(nn.Module):
         return x
 
 
-class Cifar10_Resnet(nn.Module):
+class Cifar10_Resnet18(nn.Module):
     def __init__(self):
-        super(Cifar10_Resnet, self).__init__()
+        super(Cifar10_Resnet18, self).__init__()
         base = resnet18(pretrained=False)
+        self.base = nn.Sequential(*list(base.children())[:-1])
+        in_features = base.fc.in_features
+        self.drop = nn.Dropout()
+        self.final = nn.Linear(in_features, 10)
+    
+    def forward(self,x):
+        x = self.base(x)
+        x = self.drop(x.view(-1,self.final.in_features))
+        return self.final(x)
+
+class Cifar10_Resnet34(nn.Module):
+    def __init__(self):
+        super(Cifar10_Resnet34, self).__init__()
+        base = resnet34(pretrained=False)
         self.base = nn.Sequential(*list(base.children())[:-1])
         in_features = base.fc.in_features
         self.drop = nn.Dropout()
@@ -220,53 +236,25 @@ class Cifar10_Autoencoder(nn.Module):
         
         ### Convolutional section
         self.encoder_cnn = nn.Sequential(
-            nn.Conv2d(3, 8, 3, stride=2, padding=1),
+            nn.Conv2d(3, 12, 4, stride=2, padding=1),
             nn.ReLU(True),
-            nn.Conv2d(8, 16, 3, stride=2, padding=1),
+            nn.Conv2d(12, 24, 4, stride=2, padding=1),
             nn.BatchNorm2d(16),
             nn.ReLU(True),
-            nn.Conv2d(16, 32, 3, stride=2, padding=0),
+            nn.Conv2d(24, 48, 4, stride=2, padding=0),
             nn.ReLU(True)
         )
-        
-        ### Flatten layer
-        self.flatten = nn.Flatten(start_dim=1)
-        ### Linear section
-        self.encoder_lin = nn.Sequential(
-            nn.Linear(3 * 3 * 32, 128),
-            nn.ReLU(True),
-            nn.Linear(128, 4)
-        )
-        
-        self.decoder_lin = nn.Sequential(
-            nn.Linear(4, 128),
-            nn.ReLU(True),
-            nn.Linear(128, 4 * 4 * 32),
-            nn.ReLU(True)
-        )
-        
-        self.unflatten = nn.Unflatten(dim=1, 
-        unflattened_size=(32, 4, 4))
 
         self.decoder_conv = nn.Sequential(
-            nn.ConvTranspose2d(32, 16, 4, 
-            stride=2, padding=1),
-            nn.BatchNorm2d(16),
+            nn.ConvTranspose2d(48, 24, 4, stride=2, padding=1),
             nn.ReLU(True),
-            nn.ConvTranspose2d(16, 8, 4, stride=2, 
-            padding=1),
-            nn.BatchNorm2d(8),
+            nn.ConvTranspose2d(24, 12, 4, stride=2, padding=1),
             nn.ReLU(True),
-            nn.ConvTranspose2d(8, 3, 4, stride=2, 
-            padding=1)
+            nn.ConvTranspose2d(12, 3, 4, stride=2, padding=1)
         )
         
     def forward(self, x):
         x = self.encoder_cnn(x)
-        x = self.flatten(x)
-        x = self.encoder_lin(x)
-        x = self.decoder_lin(x)
-        x = self.unflatten(x)
         x = self.decoder_conv(x)
         x = torch.sigmoid(x)
         return x
