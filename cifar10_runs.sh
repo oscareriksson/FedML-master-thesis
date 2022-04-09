@@ -11,17 +11,17 @@ done
 
 n_rounds=100
 local_epochs_ensemble=20
-student_epochs=30
+student_epochs=10
 student_epochs_w2=100
 autoencoder_epochs=50
 public_data_sizes="500 1000 5000 10000 25000"
 
-n_rounds=1
-local_epochs_ensemble=1
-student_epochs=1
-student_epochs_w2=1
-autoencoder_epochs=1
-public_data_sizes="500 1000"
+# n_rounds=1
+# local_epochs_ensemble=1
+# student_epochs=1
+# student_epochs_w2=1
+# autoencoder_epochs=1
+# public_data_sizes="500 1000"
 
 student_models=("cifar10_resnet18" "cifar10_resnet34")
 loss_functions=("mse" "ce")
