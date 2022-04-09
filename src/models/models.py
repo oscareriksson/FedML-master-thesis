@@ -240,7 +240,7 @@ class Cifar10_Autoencoder(nn.Module):
             nn.ReLU(True),
             nn.Conv2d(12, 24, 4, stride=2, padding=1),
             nn.ReLU(True),
-            nn.Conv2d(24, 48, 4, stride=2, padding=0),
+            nn.Conv2d(24, 48, 4, stride=2, padding=1),
             nn.ReLU(True)
         )
 
