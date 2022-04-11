@@ -1,6 +1,6 @@
 #!/bin/bash
 
-paths=./settings/cifar10*/
+paths=./settings/cifar10*_s0/
 settings=()
 for path in $paths
 do  
