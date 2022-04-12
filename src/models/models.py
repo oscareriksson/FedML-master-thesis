@@ -276,12 +276,12 @@ class Cifar10_Autoencoder(nn.Module):
             padding=0, output_padding=1)
         )
 
-        def forward(self, x):
-            x = self.encoder_cnn(x)
-            x = self.flatten(x)
-            x = self.encoder_lin(x)
-            x = self.decoder_lin(x)
-            x = self.unflatten(x)
-            x = self.decoder_conv(x)
-            x = torch.sigmoid(x)
-            return x
+    def forward(self, x):
+        x = self.encoder_cnn(x)
+        x = self.flatten(x)
+        x = self.encoder_lin(x)
+        x = self.decoder_lin(x)
+        x = self.unflatten(x)
+        x = self.decoder_conv(x)
+        x = torch.sigmoid(x)
+        return x
