@@ -68,7 +68,7 @@ if __name__ == "__main__":
     parser.add_argument("--n_clients", type=int, default=10, help="Number of clients per round")
     parser.add_argument("--public_fraction", type=float, default=0.5)
     parser.add_argument("--distribution", type=str, default="niid")
-    parser.add_argument("--alpha", type=float, default=0.1)
+    parser.add_argument("--alpha", type=float, default=1)
 
     args = parser.parse_args()
 
