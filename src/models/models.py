@@ -251,11 +251,11 @@ class Cifar10_Autoencoder(nn.Module):
         self.encoder_lin = nn.Sequential(
             nn.Linear(3 * 3 * 128, 128),
             nn.ReLU(True),
-            nn.Linear(128, 16)
+            nn.Linear(128, 32)
         )
         
         self.decoder_lin = nn.Sequential(
-            nn.Linear(16, 128),
+            nn.Linear(32, 128),
             nn.ReLU(True),
             nn.Linear(128, 3 * 3 * 128),
             nn.ReLU(True)
