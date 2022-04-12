@@ -249,15 +249,15 @@ class Cifar10_Autoencoder(nn.Module):
         self.flatten = nn.Flatten(start_dim=1)
         ### Linear section
         self.encoder_lin = nn.Sequential(
-            nn.Linear(3 * 3 * 128, 128),
+            nn.Linear(3 * 3 * 128, 256),
             nn.ReLU(True),
-            nn.Linear(128, 64)
+            nn.Linear(256, 128)
         )
         
         self.decoder_lin = nn.Sequential(
-            nn.Linear(64, 128),
+            nn.Linear(128, 256),
             nn.ReLU(True),
-            nn.Linear(128, 3 * 3 * 128),
+            nn.Linear(256, 3 * 3 * 128),
             nn.ReLU(True)
         )
         
