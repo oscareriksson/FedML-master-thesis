@@ -1,6 +1,6 @@
 settings_file cifar10_resnet18_c10_niid0.1_s0
 algorithm fedprox
-n_rounds 1
+n_rounds 100
 local_epochs 1
 mu 0.01
 train_batch_size 80

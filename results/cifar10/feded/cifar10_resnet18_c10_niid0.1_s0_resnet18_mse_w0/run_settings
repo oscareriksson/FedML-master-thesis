@@ -9,12 +9,12 @@ learning_rate 0.001
 momentum 0.9
 num_workers 4
 student_model cifar10_resnet18
-local_epochs_ensemble 1
+local_epochs_ensemble 20
 client_sample_fraction 1.0
 public_batch_size 64
 student_batch_size 50
-student_epochs 1
-public_data_sizes 500 1000
+student_epochs 10
+public_data_sizes 500 1000 5000 10000 25000
 weight_scheme 0
 autoencoder_epochs 1
 student_lr 0.001
