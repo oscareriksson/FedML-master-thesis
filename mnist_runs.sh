@@ -27,51 +27,43 @@ student_models=("mnist_cnn1" "mnist_cnn2" "mnist_cnn3")
 loss_functions=("mse" "ce")
 
 # FEDAVG
-# for set in ${settings[@]}
-# do  
-#     python3 main.py --settings_file $set --algorithm fedavg --local_epochs 1 --n_rounds $n_rounds
-# done
+for set in ${settings[@]}
+do  
+    python3 main.py --settings_file $set --algorithm fedavg --local_epochs 1 --n_rounds $n_rounds
+done
 
-# # FEDPROX
-# for set in ${settings[@]}
-# do  
-#     python3 main.py --settings_file $set --algorithm fedprox --local_epochs 1 --n_rounds $n_rounds
-# done
+# FEDPROX
+for set in ${settings[@]}
+do  
+    python3 main.py --settings_file $set --algorithm fedprox --local_epochs 1 --n_rounds $n_rounds --mu 0.5
+done
 
 # FEDED
-# for set in ${settings[@]}
-# do  
-#     for model in ${student_models[@]}
-#     do
-#         python3 main.py --settings_file $set --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model $model --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs --weight_scheme 0
-#     done
-# done
+for set in ${settings[@]}
+do  
+    for model in ${student_models[@]}
+    do
+        python3 main.py --settings_file $set --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model $model --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs --weight_scheme 0
+    done
+done
 
-# # FEDED, w1
-# for set in ${settings[@]}
-# do  
-#     for model in ${student_models[@]}
-#     do
-#         python3 main.py --settings_file $set --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model $model --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs --weight_scheme 1
-#     done
-# done
+# FEDED, w1
+for set in ${settings[@]}
+do  
+    for model in ${student_models[@]}
+    do
+        python3 main.py --settings_file $set --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model $model --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs --weight_scheme 1
+    done
+done
 
-# # FEDED, w2
-# for set in ${settings[@]}
-# do  
-#     for model in ${student_models[@]}
-#     do
-#         for loss in ${loss_functions[@]}
-#         do
-#             python3 main.py --settings_file $set --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model $model --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs_w2 --weight_scheme 2 --autoencoder_epochs $autoencoder_epochs --student_lr 0.00001
-#         done    
-#     done
-# done
-
-# for set in ${settings[@]}
-# do  
-#     python3 main.py --settings_file $set --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model mnist_cnn2 --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs_w2 --student_loss ce --weight_scheme 2 --autoencoder_epochs $autoencoder_epochs --student_lr 0.00001 
-# done
-
-python3 main.py --settings_file mnist_cnn1_c10_niid10.0_s4 --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model mnist_cnn2 --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs_w2 --student_loss ce --weight_scheme 2 --autoencoder_epochs $autoencoder_epochs --student_lr 0.00001
-python3 main.py --settings_file mnist_cnn1_c10_niid10.0_s5 --algorithm feded --local_epochs_ensemble $local_epochs_ensemble --student_model mnist_cnn2 --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs_w2 --student_loss ce --weight_scheme 2 --autoencoder_epochs $autoencoder_epochs --student_lr 0.00001
+# FEDED, w2
+for set in ${settings[@]}
+do  
+    for model in ${student_models[@]}
+    do
+        for loss in ${loss_functions[@]}
+        do
+            python3 main.py --settings_file $set --algorithm feded --student_loss $loss --local_epochs_ensemble $local_epochs_ensemble --student_model $model --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs_w2 --weight_scheme 2 --autoencoder_epochs $autoencoder_epochs --student_lr 0.00001
+        done    
+    done
+done
