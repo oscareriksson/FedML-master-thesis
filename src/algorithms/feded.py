@@ -16,19 +16,22 @@ class FedEdServer(ServerBase):
     def __init__(self, args, model, run_folder, train_loaders, test_loader, public_loader) -> None:
         super().__init__(args, model, run_folder, train_loaders, test_loader, public_loader)
 
-        self.student_model = args.student_model
+        self.student_models = [student for student in args.student_models.split(' ')]
         self.logits_local = None
         self.local_epochs_ensemble = args.local_epochs_ensemble
         self.student_batch_size = args.student_batch_size
         self.public_batch_size = args.public_batch_size
         self.student_epochs = args.student_epochs
+        self.student_epochs_w2 = args.student_epochs_w2
         self.public_data_sizes = [int(x) for x in args.public_data_sizes.split(' ')]
-        self.weight_scheme = args.weight_scheme
+        self.weight_schemes_list = [int(x) for x in args.weight_schemes.split(' ')]
+        self.weight_scheme = self.weight_schemes_list[0]
         self.client_sample_fraction = args.client_sample_fraction
         self.ae_public_weights = []
         self.ae_test_weights = []
         self.autoencoder_epochs = args.autoencoder_epochs
         self.student_lr = args.student_lr
+        self.student_lr_w2 = args.student_lr_w2
         self.student_loss = args.student_loss
 
     def run(self):
@@ -45,8 +48,11 @@ class FedEdServer(ServerBase):
             accs, losses = self._local_training(j)
             local_accs.extend([accs])
             local_losses.extend([losses])
+            self._save_results(local_accs, "client_accuracy")
+            self._save_results(local_losses, "client_loss")
+
             local_public_logits, local_test_logits  = self._get_local_logits()
-            if self.weight_scheme == 2:
+            if 2 in self.weight_schemes_list:
                 public_weights, test_weights = self._get_autoencoder_weights(client_nr=j)
                 self.ae_public_weights.append(public_weights)
                 self.ae_test_weights.append(test_weights)
@@ -54,26 +60,40 @@ class FedEdServer(ServerBase):
             ensemble_public_logits.append(local_public_logits)
             ensemble_test_logits.append(local_test_logits)
 
-        ensemble_test_acc = self._ensemble_accuracy(ensemble_test_logits)
-        print("Ensemble test accuracy: {:.0f}%".format(ensemble_test_acc))
+        for scheme in self.weight_schemes_list:
+            self.weight_scheme = scheme
+            ensemble_test_acc = self._ensemble_accuracy(ensemble_test_logits)
+            print("Ensemble-w{} test accuracy: {:.0f}%".format(scheme, ensemble_test_acc))
+            self._save_results([ensemble_test_acc], f"w{scheme}_ensemble_test_acc")
+        print("")
 
-        self._save_results(local_accs, "client_accuracy")
-        self._save_results(local_losses, "client_loss")
-        self._save_results([ensemble_test_acc], "ensemble_test_acc")
+        losses = ["mse"]
+        for scheme in self.weight_schemes_list:
+            self.weight_scheme = scheme
 
-        for public_size in self.public_data_sizes:
-            print(f"Public dataset size: {public_size}")
-            student_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(public_size, ensemble_public_logits)
+            if scheme == 2:
+                losses.append("ce")
+                self.student_epochs = self.student_epochs_w2
+                self.student_lr = self.student_lr_w2
 
-            self._train_student(ensemble_public_logits, student_loader, public_train_loader, public_val_loader, public_size)
+            for loss in losses:
+                self.student_loss = loss
+                for student_model in self.student_models:
+                    print(f"|| Training student model: {student_model}. Weight scheme: {scheme}. Loss: {loss} ||")
 
-            test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
-        
-            self._save_results([test_acc, test_loss], f"student_test_results_{public_size}")
+                    for public_size in self.public_data_sizes:
+                        print(f"Public dataset size: {public_size}")
+                        student_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(public_size, ensemble_public_logits)
 
-            print('\nStudent Model Test: Avg. loss: {:.4f}, Accuracy: {:.0f}%\n'.format(
-            test_loss,
-            test_acc))
+                        self._train_student(student_model, ensemble_public_logits, student_loader, public_train_loader, public_val_loader, public_size)
+
+                        test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
+                    
+                        self._save_results([test_acc, test_loss], f"w{scheme}_student_{student_model}_{loss}_test_results_{public_size}")
+
+                        print('\nStudent Model Test: Avg. loss: {:.4f}, Accuracy: {:.0f}%\n'.format(
+                        test_loss,
+                        test_acc))
     
     def _local_training(self, client_nr):        
         """ Complete local training at client.
@@ -104,9 +124,8 @@ class FedEdServer(ServerBase):
 
         return train_accs, train_losses
     
-    def _train_student(self, ensemble_logits, student_loader, public_train_loader, public_val_loader, public_size):
-        print("-- Training student model --", flush=True)
-        model = create_model(self.student_model).to(self.device)
+    def _train_student(self, student_model, ensemble_logits, student_loader, public_train_loader, public_val_loader, public_size):
+        model = create_model(student_model).to(self.device)
         loss_function = nn.MSELoss() if self.student_loss == "mse" else nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=self.student_lr)
 
@@ -176,7 +195,7 @@ class FedEdServer(ServerBase):
 
             train_loss = np.mean(train_loss)
             print('Epoch {}/{} \t train loss {}'.format(epoch + 1, self.autoencoder_epochs, train_loss), end="\r")
-        print("")
+        print("\n\n")
 
         autoencoder.eval()
 
