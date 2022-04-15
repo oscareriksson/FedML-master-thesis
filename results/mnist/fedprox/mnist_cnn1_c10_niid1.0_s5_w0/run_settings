@@ -2,7 +2,7 @@ settings_file mnist_cnn1_c10_niid1.0_s5
 algorithm fedprox
 n_rounds 100
 local_epochs 1
-mu 0.0
+mu 0.5
 train_batch_size 64
 test_batch_size 64
 learning_rate 0.001
