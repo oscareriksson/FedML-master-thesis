@@ -63,4 +63,4 @@ do
     do
         python3 main.py --settings_file $set --algorithm feded --train_batch_size 80 --local_epochs_ensemble $local_epochs_ensemble --student_model $model --public_data_sizes="$public_data_sizes" --client_sample_fraction 1.0 --student_epochs $student_epochs --weight_scheme 2 --student_loss ce --autoencoder_epochs $autoencoder_epochs
     done
-done
+done 
