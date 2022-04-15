@@ -85,10 +85,12 @@ class FedEdServer(ServerBase):
                         print(f"Public dataset size: {public_size}")
                         student_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(public_size, ensemble_public_logits)
 
-                        self._train_student(student_model, ensemble_public_logits, student_loader, public_train_loader, public_val_loader, public_size)
+                        train_accs, train_losses, val_accs, val_losses = \
+                            self._train_student(student_model, ensemble_public_logits, student_loader, public_train_loader, public_val_loader, public_size)
 
                         test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
-                    
+
+                        self._save_results([train_accs, train_losses, val_accs, val_losses], f"w{scheme}_student_{student_model}_{loss}_train_results_{public_size}")
                         self._save_results([test_acc, test_loss], f"w{scheme}_student_{student_model}_{loss}_test_results_{public_size}")
 
                         print('\nStudent Model Test: Avg. loss: {:.4f}, Accuracy: {:.0f}%\n'.format(
@@ -168,9 +170,9 @@ class FedEdServer(ServerBase):
             print("Epoch {}/{} Train accuracy: {:.0f}%  Train loss: {:.4f} Val accuracy: {:.0f}%  Val loss: {:.4f}".format(
                 epoch+1, self.student_epochs, train_acc, train_loss, val_acc, val_loss), end="\r", flush=True)
 
-
         self.global_model = model
-        self._save_results([train_accs, train_losses, val_accs, val_losses], f'student_train_results{public_size}')
+
+        return train_acc, train_losses, val_accs, val_losses
 
     def _get_autoencoder_weights(self, client_nr):
         """
