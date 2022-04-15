@@ -26,7 +26,7 @@ weight_schemes="0 1 2"
 # seeds=(20)
 # alphas=(10.0 1.0)
 
-settings_summary="--dataset $dataset --n_clients $n_clients --public_fraction $public_fraction --distribution niid --local_model $local_model --client_sample_fraction 1.0"
+settings_summary="--dataset $dataset --n_clients $n_clients --public_fraction $public_fraction --distribution niid --local_model $local_model --client_sample_fraction 1.0 --autoencoder_epochs $autoencoder_epochs"
 
 # # FEDAVG
 # for seed in ${seeds[@]}
