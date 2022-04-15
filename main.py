@@ -142,7 +142,7 @@ if __name__ == "__main__":
     print("=" * 80)
     print("Summary of training process:")
     print("Algorithm:                   {}".format(args.algorithm))
-    print("Seed:                        {}".format(args.algorithm))
+    print("Seed:                        {}".format(args.seed))
     print("Dataset:                     {}".format(args.dataset))
     print("Number of clients:           {}".format(args.n_clients))
     print("Alpha:                       {}".format(args.alpha))
