@@ -12,7 +12,7 @@ autoencoder_epochs=30
 public_data_sizes="500 1000 5000 15000 30000"
 local_model="mnist_cnn1"
 
-seeds=(6 7 8 9 10)
+seeds=(1 2 3 4 5)
 alphas=(10.0 1.0 0.1 0.01)
 student_models="mnist_cnn1 mnist_cnn2 mnist_cnn3"
 weight_schemes="0 1 2"
@@ -26,7 +26,7 @@ weight_schemes="0 1 2"
 # seeds=(20)
 # alphas=(10.0 1.0)
 
-settings_summary="--dataset $dataset --n_clients $n_clients --public_fraction $public_fraction --distribution niid --local_model $local_model --client_sample_fraction 1.0 --autoencoder_epochs $autoencoder_epochs"
+settings_summary="--dataset $dataset --n_clients $n_clients --public_fraction $public_fraction --distribution niid --local_model $local_model --client_sample_fraction 1.0"
 
 # # FEDAVG
 # for seed in ${seeds[@]}
@@ -46,7 +46,7 @@ settings_summary="--dataset $dataset --n_clients $n_clients --public_fraction $p
 #     done
 # done
 
-settings_ensemble="--local_epochs_ensemble $local_epochs_ensemble --student_epochs $student_epochs --student_epochs_w2 $student_epochs_w2 --student_lr_w2 $student_lr_w2"
+settings_ensemble="--local_epochs_ensemble $local_epochs_ensemble --student_epochs $student_epochs --student_epochs_w2 $student_epochs_w2 --student_lr_w2 $student_lr_w2  --autoencoder_epochs $autoencoder_epochs"
 
 # FEDED w0 w1 w2
 for seed in ${seeds[@]}
