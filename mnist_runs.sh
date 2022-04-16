@@ -42,7 +42,7 @@ for seed in ${seeds[@]}
 do
     for alpha in ${alphas[@]}
     do  
-        python3 main.py $settings_summary --algorithm fedprox --seed $seed --alpha $alpha --local_epochs 1 --n_rounds $n_rounds --mu 0.5
+        python3 main.py $settings_summary --algorithm fedprox --seed $seed --alpha $alpha --local_epochs 1 --n_rounds $n_rounds --mu 1
     done
 done
 
