@@ -85,8 +85,7 @@ class FedEdServer(ServerBase):
                         print(f"Public dataset size: {public_size}")
                         student_loader, public_train_loader, public_val_loader = self._get_student_data_loaders(public_size, ensemble_public_logits)
 
-                        train_accs, train_losses, val_accs, val_losses = \
-                            self._train_student(student_model, ensemble_public_logits, student_loader, public_train_loader, public_val_loader, public_size)
+                        train_accs, train_losses, val_accs, val_losses = self._train_student(student_model, ensemble_public_logits, student_loader, public_train_loader, public_val_loader, public_size)
 
                         test_acc, test_loss = self.evaluate(self.global_model, self.test_loader)
 
@@ -172,7 +171,7 @@ class FedEdServer(ServerBase):
 
         self.global_model = model
 
-        return train_acc, train_losses, val_accs, val_losses
+        return train_accs, train_losses, val_accs, val_losses
 
     def _get_autoencoder_weights(self, client_nr):
         """

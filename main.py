@@ -127,7 +127,7 @@ if __name__ == "__main__":
     parser.add_argument("--client_sample_fraction", type=float, default=0.4)
     parser.add_argument("--public_batch_size", type=int, default=64)
     parser.add_argument("--student_batch_size", type=int, default=50)
-    parser.add_argument("--student_epochs", type=int, default=1)
+    parser.add_argument("--student_epochs", type=int, default=5)
     parser.add_argument("--student_epochs_w2", type=int, default=1)
     parser.add_argument("--public_data_sizes", type=str, default="1000 1000")
     parser.add_argument("--weight_schemes", type=str, default="0")
