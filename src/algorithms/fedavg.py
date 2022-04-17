@@ -55,7 +55,7 @@ class FedAvgServer(ServerBase):
         """
         self.local_model = copy.deepcopy(self.global_model).to(self.device)
         self.local_model.train()
-        optimizer = optim.SGD(self.local_model.parameters(), lr=self.lr_rate)
+        optimizer = optim.SGD(self.local_model.parameters(), lr=self.lr_rate, momentum=self.momentum)
 
         for i in range(self.local_epochs):
             for x, y in self.train_loaders[client_nr]:
