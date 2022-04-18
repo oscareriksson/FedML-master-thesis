@@ -23,6 +23,6 @@ class FedProxServer(FedAvgServer):
 
         if self.round_nr > 0:
             for w, w_t in zip(self.local_model.parameters(), self.global_model.parameters()):
-                loss += self.mu / 2. * torch.pow(torch.norm(w.data - w_t.data), 2)
-                w.grad.data += self.mu * (w.data - w_t.data)
+                loss += (self.mu / 2.) * (w.data - w_t.data).norm(2)
+
         return loss
