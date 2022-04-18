@@ -7,6 +7,7 @@ n_rounds=100
 local_epochs_ensemble=50
 student_epochs=30
 student_epochs_w2=100
+student_lr_w2=1e-5
 autoencoder_epochs=30
 public_data_sizes="500 1000 5000 30000 60000"
 local_model="emnist_cnn1"
