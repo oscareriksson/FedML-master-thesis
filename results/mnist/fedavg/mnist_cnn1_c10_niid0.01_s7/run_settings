@@ -19,7 +19,7 @@ momentum 0.9
 client_sample_fraction 1.0
 public_batch_size 64
 student_batch_size 50
-student_epochs 1
+student_epochs 5
 student_epochs_w2 1
 public_data_sizes 1000 1000
 weight_schemes 0
