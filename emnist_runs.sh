@@ -12,7 +12,7 @@ autoencoder_epochs=30
 public_data_sizes="500 1000 5000 30000 60000"
 local_model="emnist_cnn1"
 
-seeds=(6 7 8 9 10)
+seeds=(1 2 3 4 5)
 alphas=(10.0 1.0 0.1 0.01)
 student_models="emnist_cnn1 emnist_cnn2 emnist_cnn3"
 weight_schemes="0 1 2"
