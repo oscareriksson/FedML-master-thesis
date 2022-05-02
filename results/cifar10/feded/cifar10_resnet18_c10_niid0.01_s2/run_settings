@@ -20,9 +20,9 @@ client_sample_fraction 1.0
 public_batch_size 64
 student_batch_size 50
 student_epochs 10
-student_epochs_w2 100
+student_epochs_w2 50
 public_data_sizes 500 1000 5000 10000 25000
-weight_schemes 0 1 2
+weight_schemes 2
 autoencoder_epochs 50
 student_lr 0.001
 student_lr_w2 1e-05

@@ -1,0 +1,29 @@
+seed 4
+dataset emnist
+n_clients 10
+public_fraction 0.5
+distribution niid
+alpha 10.0
+algorithm fedprox
+local_model emnist_cnn1
+n_rounds 100
+local_epochs 1
+mu 0.1
+train_batch_size 64
+test_batch_size 64
+learning_rate 0.001
+num_workers 4
+student_models mnist_cnn1 mnist_cnn2
+local_epochs_ensemble 1
+momentum 0.9
+client_sample_fraction 1.0
+public_batch_size 64
+student_batch_size 50
+student_epochs 5
+student_epochs_w2 1
+public_data_sizes 1000 1000
+weight_schemes 0
+autoencoder_epochs 1
+student_lr 0.001
+student_lr_w2 0.001
+student_loss mse
