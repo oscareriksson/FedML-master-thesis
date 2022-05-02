@@ -45,9 +45,9 @@ class Mnist_Cnn1(nn.Module):
 class Mnist_Cnn2(nn.Module):
     def __init__(self):
         super(Mnist_Cnn2, self).__init__()
-        self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
+        self.conv1 = nn.Conv2d(1, 8, 5, 1, 2)
         self.pool = nn.MaxPool2d(4)
-        self.fc1 = nn.Linear(16 * 7 * 7, 10)
+        self.fc1 = nn.Linear(8 * 7 * 7, 10)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -59,21 +59,60 @@ class Mnist_Cnn3(nn.Module):
     def __init__(self):
         super(Mnist_Cnn3, self).__init__()
         self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
-        self.conv2 = nn.Conv2d(16, 32, 5, 1, 2)
-        self.fc1 = nn.Linear(32 * 7 * 7, 128)
-        self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, 10)
-        self.pool1 = nn.MaxPool2d(2)
-        self.pool2 = nn.MaxPool2d(2)
+        self.pool = nn.MaxPool2d(4)
+        self.fc1 = nn.Linear(16 * 7 * 7, 10)
 
     def forward(self, x):
-        x = self.pool1(F.relu(self.conv1(x)))
-        x = self.pool2(F.relu(self.conv2(x)))
+        x = self.pool(F.relu(self.conv1(x)))
         x = torch.flatten(x, 1)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = self.fc1(x)
         return x
+
+# class Mnist_Cnn1(nn.Module):
+#     def __init__(self):
+#         super(Mnist_Cnn1, self).__init__()
+#         self.conv1 = nn.Conv2d(1, 2, 5, 1, 2)
+#         self.pool = nn.MaxPool2d(4)
+#         self.fc1 = nn.Linear(2 * 7 * 7, 10)
+
+#     def forward(self, x):
+#         x = self.pool(F.relu(self.conv1(x)))
+#         x = torch.flatten(x, 1)
+#         x = self.fc1(x)
+#         return x
+
+# class Mnist_Cnn2(nn.Module):
+#     def __init__(self):
+#         super(Mnist_Cnn2, self).__init__()
+#         self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
+#         self.pool = nn.MaxPool2d(4)
+#         self.fc1 = nn.Linear(16 * 7 * 7, 10)
+
+#     def forward(self, x):
+#         x = self.pool(F.relu(self.conv1(x)))
+#         x = torch.flatten(x, 1)
+#         x = self.fc1(x)
+#         return x
+
+# class Mnist_Cnn3(nn.Module):
+#     def __init__(self):
+#         super(Mnist_Cnn3, self).__init__()
+#         self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
+#         self.conv2 = nn.Conv2d(16, 32, 5, 1, 2)
+#         self.fc1 = nn.Linear(32 * 7 * 7, 128)
+#         self.fc2 = nn.Linear(128, 64)
+#         self.fc3 = nn.Linear(64, 10)
+#         self.pool1 = nn.MaxPool2d(2)
+#         self.pool2 = nn.MaxPool2d(2)
+
+#     def forward(self, x):
+#         x = self.pool1(F.relu(self.conv1(x)))
+#         x = self.pool2(F.relu(self.conv2(x)))
+#         x = torch.flatten(x, 1)
+#         x = F.relu(self.fc1(x))
+#         x = F.relu(self.fc2(x))
+#         x = self.fc3(x)
+#         return x
 
 
 class Emnist_Cnn1(nn.Module):
@@ -105,22 +144,51 @@ class Emnist_Cnn2(nn.Module):
 class Emnist_Cnn3(nn.Module):
     def __init__(self):
         super(Emnist_Cnn3, self).__init__()
-        self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
+        self.conv1 = nn.Conv2d(1, 8, 5, 1, 2)
         self.pool1 = nn.MaxPool2d(2)
-        self.conv2 = nn.Conv2d(16, 32, 5, 1, 2)
+        self.conv2 = nn.Conv2d(8, 16, 5, 1, 2)
         self.pool2 = nn.MaxPool2d(2)
-        self.fc1 = nn.Linear(32 * 7 * 7, 128)
-        self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, 26)
+        self.fc1 = nn.Linear(16 * 7 * 7, 26)
 
     def forward(self, x):
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool2(F.relu(self.conv2(x)))
         x = torch.flatten(x, 1)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = self.fc1(x)
         return x
+
+# class Emnist_Cnn2(nn.Module):
+#     def __init__(self):
+#         super(Emnist_Cnn2, self).__init__()
+#         self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
+#         self.pool = nn.MaxPool2d(4)
+#         self.fc1 = nn.Linear(16 * 7 * 7, 26)
+
+#     def forward(self, x):
+#         x = self.pool(F.relu(self.conv1(x)))
+#         x = torch.flatten(x, 1)
+#         x = self.fc1(x)
+#         return x
+
+# class Emnist_Cnn3(nn.Module):
+#     def __init__(self):
+#         super(Emnist_Cnn3, self).__init__()
+#         self.conv1 = nn.Conv2d(1, 16, 5, 1, 2)
+#         self.pool1 = nn.MaxPool2d(2)
+#         self.conv2 = nn.Conv2d(16, 32, 5, 1, 2)
+#         self.pool2 = nn.MaxPool2d(2)
+#         self.fc1 = nn.Linear(32 * 7 * 7, 128)
+#         self.fc2 = nn.Linear(128, 64)
+#         self.fc3 = nn.Linear(64, 26)
+
+#     def forward(self, x):
+#         x = self.pool1(F.relu(self.conv1(x)))
+#         x = self.pool2(F.relu(self.conv2(x)))
+#         x = torch.flatten(x, 1)
+#         x = F.relu(self.fc1(x))
+#         x = F.relu(self.fc2(x))
+#         x = self.fc3(x)
+#         return x
 
 class Cifar10_Cnn(nn.Module):
     def __init__(self):
