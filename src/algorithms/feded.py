@@ -72,7 +72,7 @@ class FedEdServer(ServerBase):
             self.weight_scheme = scheme
 
             if scheme == 2:
-                losses.append("ce")
+                # losses.append("ce")
                 self.student_epochs = self.student_epochs_w2
                 self.student_lr = self.student_lr_w2
 
