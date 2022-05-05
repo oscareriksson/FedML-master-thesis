@@ -15,7 +15,7 @@ local_model="emnist_cnn1"
 seeds=(1 2 3 4 5 6 7 8 9 10)
 alphas=(10.0 1.0 0.1 0.01)
 student_models="emnist_cnn2 emnist_cnn3"
-weight_schemes="2"
+weight_schemes="0 1"
 
 # n_rounds=1
 # local_epochs_ensemble=1
