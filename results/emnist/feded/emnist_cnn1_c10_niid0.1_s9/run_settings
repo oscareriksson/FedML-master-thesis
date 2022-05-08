@@ -22,7 +22,7 @@ student_batch_size 50
 student_epochs 30
 student_epochs_w2 100
 public_data_sizes 500 1000 5000 30000 60000
-weight_schemes 2
+weight_schemes 0 1
 autoencoder_epochs 30
 student_lr 0.001
 student_lr_w2 1e-05
