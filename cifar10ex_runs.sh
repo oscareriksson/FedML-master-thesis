@@ -17,12 +17,12 @@ alphas=(10.0 1.0 0.1 0.01)
 student_models="cifar10_resnet18"
 weight_schemes="0 1 2"
 
-n_rounds=1
-local_epochs_ensemble=1
-student_epochs=1
-student_epochs_w2=1
-autoencoder_epochs=1
-public_data_sizes="1000"
+# n_rounds=1
+# local_epochs_ensemble=1
+# student_epochs=1
+# student_epochs_w2=1
+# autoencoder_epochs=1
+# public_data_sizes="1000"
 
 settings_summary="--dataset $dataset --n_clients $n_clients --public_fraction $public_fraction --distribution niid --local_model $local_model --client_sample_fraction 1.0 --train_batch_size 80"
 

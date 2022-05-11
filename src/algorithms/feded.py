@@ -67,12 +67,12 @@ class FedEdServer(ServerBase):
             self._save_results([ensemble_test_acc], f"w{scheme}_ensemble_test_acc")
         print("")
 
-        losses = ["ce"]
+        losses = ["mse"]
         for scheme in self.weight_schemes_list:
             self.weight_scheme = scheme
 
             if scheme == 2:
-                # losses.append("ce")
+                losses.append("ce")
                 self.student_epochs = self.student_epochs_w2
                 self.student_lr = self.student_lr_w2
 
