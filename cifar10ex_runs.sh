@@ -18,7 +18,7 @@ student_models="cifar10_resnet18"
 weight_schemes="0 1 2"
 
 seeds=(0)
-alphas=(10.0)
+alphas=(0.1)
 student_models="cifar10_resnet18"
 weight_schemes="2"
 
