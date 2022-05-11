@@ -6,7 +6,7 @@ import torch
 import numpy as np
 
 
-class Cifar10ex(PytorchDataset):
+class Cifar10Ex(PytorchDataset):
     """ Cifar10 dataset class.
     """
     def __init__(self, num_workers, public_fraction=0.5):
