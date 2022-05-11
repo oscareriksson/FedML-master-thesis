@@ -17,6 +17,11 @@ alphas=(10.0 1.0 0.1 0.01)
 student_models="cifar10_resnet18"
 weight_schemes="0 1 2"
 
+seeds=(0)
+alphas=(10.0)
+student_models="cifar10_resnet18"
+weight_schemes="2"
+
 # n_rounds=1
 # local_epochs_ensemble=1
 # student_epochs=1
