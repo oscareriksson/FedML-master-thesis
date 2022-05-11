@@ -25,6 +25,8 @@ def create_model(model_name):
         return Mnist_Autoencoder()
     elif model_name == "cifar10_autoencoder":
         return Cifar10_Autoencoder()
+    elif model_name == "cifar10ex_autoencoder":
+        return Cifar10_Autoencoder()
     else:
         print("Model name is not supported.")
         sys.exit()
