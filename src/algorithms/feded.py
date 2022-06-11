@@ -36,9 +36,6 @@ class FedEdServer(ServerBase):
 
     def run(self):
         """ Execute federated training and distillation.
-
-            Parameters:
-            round_nr    (int): Current round number.
         """
         ensemble_public_logits, ensemble_test_logits = [], []
         local_accs, local_losses = [], []
@@ -251,9 +248,6 @@ class FedEdServer(ServerBase):
 
     def _ensemble_weight(self, client_nr, active_clients, sample_indices=None, test=False):
         """ Weight client contributions.
-
-            Parameters:
-            client_nr   (int): ID for client.
         """
         if self.weight_scheme == 0:
             return self.n_samples_client[client_nr] / sum([self.n_samples_client[c] for c in active_clients])
